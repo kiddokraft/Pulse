@@ -1,5 +1,18 @@
 # Pulse 4.x
 
+
+## Pusle 4.2.8 
+
+*Jan 14, 2026*
+
+- There is a typo in the 4.2.7 release of Pulse, is called Pusle, so this fork will
+    rename to Pusle.
+    
+- Change "Pulse for Mac" to "not implemented" for future nimplementation.
+
+- Remove "vertical" layout in ConsoleToolBarView, it will cause unexcpect move to next line in iOS 26.
+
+
 ## Pulse 4.2.7
 
 *Jun 23, 2024*

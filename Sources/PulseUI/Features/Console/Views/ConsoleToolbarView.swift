@@ -18,7 +18,7 @@ struct ConsoleToolbarView: View {
         if #available(iOS 16.0, *) {
             ViewThatFits {
                 horizontal
-                vertical
+//                vertical
             }
             .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         } else {

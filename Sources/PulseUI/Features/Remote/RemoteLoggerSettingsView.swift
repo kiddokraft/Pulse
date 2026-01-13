@@ -54,9 +54,9 @@ struct RemoteLoggerSettingsView: View {
                     .cornerRadius(6)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Remote Logging")
-                    Text("Requires [Pulse for Mac](https://pulselogger.com)")
+                    Text("not implemented")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                     
                 }
 #endif
             }
