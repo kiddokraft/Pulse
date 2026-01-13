@@ -90,7 +90,7 @@ struct NetworkInspectorView: View {
         Menu(content: {
             ContextMenu.NetworkTaskContextMenuItems(task: task, sharedItems: $shareItems, isDetailsView: true)
         }, label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: "ellipsis")
         })
     }
 }

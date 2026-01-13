@@ -17,7 +17,7 @@ struct ConsoleSearchContextMenu: View {
         Menu {
             StringSearchOptionsMenu(options: $viewModel.options)
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: "ellipsis")
                 .font(.system(size: 20))
                 .foregroundColor(.accentColor)
         }

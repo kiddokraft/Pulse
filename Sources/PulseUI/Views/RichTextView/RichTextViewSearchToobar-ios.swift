@@ -36,7 +36,7 @@ struct RichTextViewSearchToobar: View {
 
     private var options: some View {
         ZStack {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: "ellipsis")
                 .foregroundColor(.accentColor)
                 .font(.system(size: 20))
                 .opacity(isRealMenuShown ? 0 : 1)
@@ -44,7 +44,7 @@ struct RichTextViewSearchToobar: View {
                 Menu(content: {
                     StringSearchOptionsMenu(options: $viewModel.searchOptions, isKindNeeded: false)
                 }, label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
                         .font(.system(size: 20))
                 })
                 .menuStyle(.borderlessButton)

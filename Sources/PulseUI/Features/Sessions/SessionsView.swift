@@ -111,7 +111,7 @@ struct SessionsView: View {
                     showInConsole(sessions: selection)
                 }.disabled(selection.isEmpty)
             }, label: {
-                Image(systemName: "ellipsis.circle")
+                Image(systemName: "ellipsis")
             })
         }
     }

@@ -30,7 +30,7 @@ struct RemoteLoggerSelectedDeviceView: View {
                     logger.forgetServer(named: name)
                 }
             }, label: {
-                Image(systemName: "ellipsis.circle")
+                Image(systemName: "ellipsis")
             })
 #if os(macOS)
             .menuStyle(.borderlessButton)

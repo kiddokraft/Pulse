@@ -14,7 +14,7 @@ public final class LoggerSessionEntity: NSManagedObject {
 public final class LoggerMessageEntity: NSManagedObject {
     @NSManaged public var createdAt: Date
     @NSManaged public var isPinned: Bool
-    @NSManaged public var session: UUID
+    @NSManaged public var session: UUID? // commit c7b6cf2c59364aadc5865d5a4d8a5f6bd06c75d1
     @NSManaged public var level: Int16
     @NSManaged public var text: String
     @NSManaged public var file: String

@@ -223,7 +223,7 @@ struct StringSearchOptionsMenu: View {
 #if os(macOS)
     var body: some View {
         Menu(content: { contents }, label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: "ellipsis")
         })
         .opacity(0.5)
         .pickerStyle(.inline)
