@@ -58,7 +58,7 @@ private struct ConsoleMainView: View {
                 }
                 ToolbarItemGroup(placement: .automatic) {
                     Button(action: { isShowingFilters = true }) {
-                        Label("Show Filters", systemImage: "line.3.horizontal.decrease.circle")
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
                     }
                     .popover(isPresented: $isShowingFilters) {
                         ConsoleFiltersView()
@@ -72,7 +72,7 @@ private struct ConsoleMainView: View {
 //                        SessionsView().frame(width: 300, height: 420)
 //                    }
                     Button(action: { isShowingSettings = true }) {
-                        Label("Show Settings", systemImage: "ellipsis.circle")
+                        Label("More", systemImage: "ellipsis.circle")
                     }
                     .popover(isPresented: $isShowingSettings) {
                         SettingsView().frame(width: 300, height: 420)
@@ -89,17 +89,17 @@ private struct ConsoleMainView: View {
     private var contentToolbarNavigationItems: some View {
         if !(environment.store.options.contains(.readonly)) {
             Toggle(isOn: $isNowEnabled) {
-                Image(systemName: "clock")
+                Label("Current", systemImage: "clock")
             }
             Button(action: { isSharingStore = true }) {
-                Image(systemName: "square.and.arrow.up")
+                Label("Share", systemImage: "square.and.arrow.up")
             }
             .popover(isPresented: $isSharingStore, arrowEdge: .bottom) {
                 ShareStoreView(onDismiss: {})
                     .frame(width: 240).fixedSize()
             }
             Button(action: { environment.store.removeAll() }) {
-                Image(systemName: "trash")
+                Label("Clear", systemImage: "trash")
             }
         }
     }
