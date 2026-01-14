@@ -52,7 +52,7 @@ struct ConsoleSearchLogLevelsCell: View {
         VStack(alignment: .leading) {
             Spacer()
             ForEach(levels, id: \.self) { level in
-                Toggle(level.name.capitalized, isOn: binding(forLevel: level))
+                Toggle(level.name.uppercased(), isOn: binding(forLevel: level))
             }
         }
     }
@@ -61,7 +61,7 @@ struct ConsoleSearchLogLevelsCell: View {
         Section {
             ForEach(LoggerStore.Level.allCases, id: \.self) { level in
                 HStack {
-                    Checkbox(level.name.capitalized, isOn: binding(forLevel: level))
+                    Checkbox(level.name.uppercased(), isOn: binding(forLevel: level))
 #if os(iOS) || os(visionOS)
                     Circle()
                         .frame(width: 8, height: 8)

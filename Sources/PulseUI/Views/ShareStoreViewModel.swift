@@ -57,7 +57,7 @@ import Combine
 
     var selectedLevelsTitle: String {
         if logLevels.count == 1 {
-            return logLevels.first!.name.capitalized
+            return logLevels.first!.name.uppercased()
         } else if logLevels.count == 0 {
             return "–"
         } else if logLevels == [.error, .critical] {

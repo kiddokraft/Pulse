@@ -201,7 +201,7 @@ private func makeName(for section: NSFetchedResultsSectionInfo, mode: ConsoleMod
         switch options.messageGroupBy {
         case .level:
             let rawValue = Int16(Int(section.name) ?? 0)
-            return (LoggerStore.Level(rawValue: rawValue) ?? .debug).name.capitalized
+            return (LoggerStore.Level(rawValue: rawValue) ?? .debug).name.uppercased()
         case .session:
             let date = (section.objects?.last as? LoggerMessageEntity)?.createdAt
             return date.map(sessionDateFormatter.string) ?? "–"
