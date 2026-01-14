@@ -53,10 +53,10 @@ private struct ConsoleMainView: View {
         ConsoleListView()
             .frame(minWidth: 200, idealWidth: 400, minHeight: 120, idealHeight: 480)
             .toolbar {
-                ToolbarItemGroup(placement: .automatic) {
+                ToolbarItemGroup(placement: .navigation) {
                     contentToolbarNavigationItems
                 }
-                ToolbarItemGroup(placement: .automatic) {
+                ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: { isShowingFilters = true }) {
                         Label("Show Filters", systemImage: "line.3.horizontal.decrease.circle")
                     }
