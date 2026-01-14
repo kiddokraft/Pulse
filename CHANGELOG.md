@@ -14,6 +14,8 @@
 
 - Change ellipsis icon for macOS 26 round windows.
 
+- Update MacOS target version to 13.0
+
 
 ## Pulse 4.2.7
 

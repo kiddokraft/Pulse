@@ -225,10 +225,10 @@ struct StringSearchOptionsMenu: View {
         Menu(content: { contents }, label: {
             Image(systemName: "ellipsis")
         })
-        .opacity(0.5)
-        .pickerStyle(.inline)
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
+//        .opacity(0.5)
+//        .pickerStyle(.inline)
+//        .menuStyle(.borderlessButton)
+//        .menuIndicator(.hidden)
     }
 #else
     var body: some View {

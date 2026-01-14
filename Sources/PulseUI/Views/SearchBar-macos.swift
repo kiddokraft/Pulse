@@ -21,28 +21,16 @@ struct SearchBar: View {
     }
 
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: imageName)
-                .foregroundColor(.secondary)
-                .padding(.leading, 6)
+        LabeledContent {
             TextField(title, text: $text)
-                .textFieldStyle(.plain)
-                .frame(height: 22)
-            if !text.isEmpty {
-                Button(action: { text = "" }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                        .frame(width: 20, height: 20)
+                .onSubmit {
+                    if !text.isEmpty {
+                        text = ""
+                    }
                 }
-                .buttonStyle(.plain)
-            }
+        } label: {
+            Image(systemName: imageName).foregroundStyle(Color.secondary)
         }
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(.separator, lineWidth: 1)
-        )
     }
 }
 
