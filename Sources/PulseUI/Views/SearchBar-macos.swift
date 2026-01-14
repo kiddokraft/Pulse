@@ -21,15 +21,18 @@ struct SearchBar: View {
     }
 
     var body: some View {
-        LabeledContent {
-            TextField(title, text: $text)
+        HStack {
+            Image(systemName: imageName)
+            TextField(title, text: $text).textFieldStyle(.plain)
                 .onSubmit {
                     if !text.isEmpty {
                         text = ""
                     }
                 }
-        } label: {
-            Image(systemName: imageName).foregroundStyle(Color.secondary)
+        }
+        .padding(.horizontal, 8).padding(.vertical, 4)
+        .background {
+            RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
         }
     }
 }

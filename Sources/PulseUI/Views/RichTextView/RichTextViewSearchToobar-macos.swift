@@ -16,24 +16,40 @@ struct RichTextViewSearchToobar: View {
             if !viewModel.matches.isEmpty {
                 HStack(spacing: 8) {
                     Button(action: viewModel.previousMatch) {
-                        Image(systemName: "chevron.left.circle")
-                            .foregroundColor(.secondary)
+                        Image(systemName: "chevron.left")
+//                            .foregroundColor(.secondary)
                     }
-                    .buttonStyle(.plain)
+//                    .buttonStyle(.plain)
                     .disabled(viewModel.matches.isEmpty)
+//                    .padding(.horizontal, 8).padding(.vertical, 4)
+//                    .background {
+//                        RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
+//                    }
 
                     Text(viewModel.matches.isEmpty ? "0 / 0" : "\(viewModel.selectedMatchIndex+1) / \(viewModel.matches.count)")
                         .font(Font.body.monospacedDigit())
-                        .foregroundColor(.secondary)
+//                        .foregroundColor(.secondary)
+//                        .padding(.horizontal, 8).padding(.vertical, 4)
+//                        .background {
+//                            RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
+//                        }
 
                     Button(action: viewModel.nextMatch) {
-                        Image(systemName: "chevron.right.circle")
-                            .foregroundColor(.secondary)
+                        Image(systemName: "chevron.right")
+//                            .foregroundColor(.secondary)
                     }
-                    .buttonStyle(.plain)
+//                    .buttonStyle(.plain)
                     .disabled(viewModel.matches.isEmpty)
+//                    .padding(.horizontal, 8).padding(.vertical, 4)
+//                    .background {
+//                        RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
+//                    }
+                    
                 }
-                .padding(.leading, 3)
+//                .padding(.horizontal, 8).padding(.vertical, 4)
+//                .background {
+//                    RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
+//                }
             }
 
             Spacer()

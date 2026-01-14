@@ -56,13 +56,13 @@ struct RichTextViewSearchToobar: View {
     private var stepper: some View {
         HStack(spacing: 12) {
             Button(action: viewModel.previousMatch) {
-                Image(systemName: "chevron.left.circle")
+                Image(systemName: "chevron.left")
                     .font(.system(size: 20))
             }.disabled(viewModel.matches.isEmpty)
             Text(viewModel.matches.isEmpty ? "0 of 0" : "\(viewModel.selectedMatchIndex+1) of \(viewModel.matches.count)")
                 .font(Font.body.monospacedDigit())
             Button(action: viewModel.nextMatch) {
-                Image(systemName: "chevron.right.circle")
+                Image(systemName: "chevron.right")
                     .font(.system(size: 20))
             }.disabled(viewModel.matches.isEmpty)
         }
