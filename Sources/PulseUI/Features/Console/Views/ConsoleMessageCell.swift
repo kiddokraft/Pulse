@@ -64,7 +64,7 @@ struct ConsoleMessageCell: View {
     private var title: String {
         var title = message.logLevel.name.capitalized
         if message.label != "default" {
-            title += "・\(message.label.capitalized)"
+            title += "・\(message.label)"
         }
         return title
     }
