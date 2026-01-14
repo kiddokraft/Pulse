@@ -53,7 +53,7 @@ private struct ConsoleMainView: View {
         ConsoleListView()
             .frame(minWidth: 200, idealWidth: 400, minHeight: 120, idealHeight: 480)
             .toolbar {
-                ToolbarItemGroup(placement: .navigation) {
+                ToolbarItemGroup(placement: .automatic) {
                     contentToolbarNavigationItems
                 }
                 ToolbarItemGroup(placement: .automatic) {
@@ -61,16 +61,18 @@ private struct ConsoleMainView: View {
                         Label("Show Filters", systemImage: "line.3.horizontal.decrease.circle")
                     }
                     .popover(isPresented: $isShowingFilters) {
-                        ConsoleFiltersView().frame(width: 300).fixedSize()
+                        ConsoleFiltersView()
+                            
+                            .frame(width: 300).fixedSize()
                     }
-                    Button(action: { isShowingSessions = true }) {
-                        Label("Show Sessions", systemImage: "list.clipboard")
-                    }
-                    .popover(isPresented: $isShowingSessions) {
-                        SessionsView().frame(width: 300, height: 420)
-                    }
+//                    Button(action: { isShowingSessions = true }) {
+//                        Label("Show Sessions", systemImage: "tray.full")
+//                    }
+//                    .popover(isPresented: $isShowingSessions) {
+//                        SessionsView().frame(width: 300, height: 420)
+//                    }
                     Button(action: { isShowingSettings = true }) {
-                        Label("Show Settings", systemImage: "gearshape")
+                        Label("Show Settings", systemImage: "ellipsis.circle")
                     }
                     .popover(isPresented: $isShowingSettings) {
                         SettingsView().frame(width: 300, height: 420)

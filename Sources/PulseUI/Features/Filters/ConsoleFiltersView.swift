@@ -20,19 +20,25 @@ struct ConsoleFiltersView: View {
         .navigationBarItems(leading: buttonReset)
 #endif
 #else
-        VStack(spacing: 0) {
+        VStack {
             ScrollView {
-                form
-            }
-            HStack {
-                Text(environment.mode == .network ? "Network Filters" : "Message Filters")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
                 Spacer()
-                buttonReset
-            }
-            .padding(.horizontal, 10)
-            .frame(height: 34, alignment: .center)
+                form
+                HStack {
+                    Text(environment.mode == .network ? "Network Filters" : "Message Filters")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    buttonReset
+                }
+                .padding(.horizontal, 10)
+              
+                .frame(height: 34, alignment: .center)
+                Spacer()
+                
+             
+            }.scrollIndicators(.hidden)
+               
         }
 #endif
     }

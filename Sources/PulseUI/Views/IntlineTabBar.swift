@@ -34,10 +34,13 @@ struct InlineTabBarItem: View {
                 .lineLimit(1)
                 .padding(2)
                 .padding(.horizontal, 2)
-                .onHover { isHovering = $0 }
-                .background(isSelected ? Color.blue.opacity(0.7) : (isHovering ? Color.blue.opacity(0.25) : nil))
-                .cornerRadius(4)
-        }.buttonStyle(.plain)
+               
+//                .cornerRadius(4)
+        } .onHover { isHovering = $0 }
+            .background(isSelected ? Color.accentColor.opacity(1) : (isHovering ? Color.primary.opacity(0.1) : nil))
+            .cornerRadius(4)
+            .buttonStyle(.link)
+            
     }
 
     private var text: some View {
