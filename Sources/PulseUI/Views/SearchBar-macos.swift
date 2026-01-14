@@ -38,9 +38,9 @@ struct SearchBar: View {
                 .buttonStyle(.plain)
             }
         }
-        .cornerRadius(4)
+        .cornerRadius(8)
         .overlay(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 8)
                 .stroke(.separator, lineWidth: 1)
         )
     }

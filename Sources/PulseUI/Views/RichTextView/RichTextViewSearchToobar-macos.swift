@@ -47,7 +47,7 @@ struct RichTextViewSearchToobar: View {
             StringSearchOptionsMenu(options: $viewModel.searchOptions, isKindNeeded: false)
                     .fixedSize()
         }
-        .padding(6)
+        .padding()
     }
 }
 
