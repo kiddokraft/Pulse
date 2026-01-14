@@ -53,7 +53,7 @@ private struct ConsoleMainView: View {
         ConsoleListView()
             .frame(minWidth: 200, idealWidth: 400, minHeight: 120, idealHeight: 480)
             .toolbar {
-                ToolbarItemGroup(placement: .navigation) {
+                ToolbarItemGroup(placement: .secondaryAction) {
                     contentToolbarNavigationItems
                 }
                 ToolbarItemGroup(placement: .primaryAction) {
