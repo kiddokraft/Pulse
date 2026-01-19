@@ -40,7 +40,6 @@ struct NetworkInspectorView: View {
             ButtonCloseDetailsView()
         }
         .padding(.horizontal, 10)
-        .offset(y: -2)
         .frame(height: 27, alignment: .center)
     }
 
