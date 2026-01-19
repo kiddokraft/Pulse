@@ -38,6 +38,7 @@ struct RichTextViewSearchToobar: View {
                         Image(systemName: "chevron.right")
 //                            .foregroundColor(.secondary)
                     }
+                    
 //                    .buttonStyle(.plain)
                     .disabled(viewModel.matches.isEmpty)
 //                    .padding(.horizontal, 8).padding(.vertical, 4)

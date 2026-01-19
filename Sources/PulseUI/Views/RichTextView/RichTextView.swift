@@ -104,11 +104,14 @@ struct RichTextView: View {
     }
 #else
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
             WrappedTextView(viewModel: viewModel)
                 .id(ObjectIdentifier(viewModel))
             if !viewModel.isToolbarHidden {
-                RichTextViewSearchToobar(viewModel: viewModel)
+                VStack{
+                    Spacer()
+                    RichTextViewSearchToobar(viewModel: viewModel)
+                }
             }
         }
         .onAppear { viewModel.prepare(searchContext) }
