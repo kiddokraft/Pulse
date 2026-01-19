@@ -24,22 +24,24 @@ struct ConsoleFiltersView: View {
             VStack {
                 Spacer()
                 form
-                HStack {
-                    Text(environment.mode == .network ? "Network Filters" : "Message Filters")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    buttonReset
-                }
-                .padding(.horizontal, 10)
+               
+            
                 
                 //                .frame(height: 34, alignment: .center)
                 Spacer()
                 
                 
-            }.scrollIndicators(.hidden)
-                .padding(0)
-        }
+            }
+            HStack {
+                Label(environment.mode == .network ? "Network Filters" : "Message Filters", systemImage: "line.3.horizontal.decrease")
+             
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Spacer()
+                buttonReset
+            }
+            .padding(.horizontal, 10)
+        }.listStyle(.plain)
         
 #endif
     }

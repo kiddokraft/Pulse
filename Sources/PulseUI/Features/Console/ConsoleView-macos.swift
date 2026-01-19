@@ -75,7 +75,7 @@ private struct ConsoleMainView: View {
                         Label("More", systemImage: "ellipsis")
                     }
                     .popover(isPresented: $isShowingSettings) {
-                        SettingsView().frame(width: 300)
+                        SettingsView().frame(width: 300, height: 210)
                     }
                 }
             }

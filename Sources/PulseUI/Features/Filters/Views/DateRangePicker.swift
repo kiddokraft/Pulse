@@ -64,9 +64,9 @@ struct DateRangePicker: View {
         HStack {
             let binding = Binding(get: { date }, set: { self.date = $0 })
             DatePicker(title, selection: binding)
-                .environment(\.locale, Locale(identifier: "en_US"))
-                .fixedSize()
                 .labelsHidden()
+
+          
             Button(action: { self.date = nil }) {
                 Image(systemName: "minus.circle.fill")
                     .font(.body)

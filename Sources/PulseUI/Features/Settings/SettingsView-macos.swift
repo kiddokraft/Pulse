@@ -26,8 +26,8 @@ struct SettingsView: View {
                 if #available(macOS 13, *), let info = try? store.info() {
                     LoggerStoreSizeChart(info: info, sizeLimit: store.configuration.sizeLimit)
                 }
-            }
-            Section {
+            
+        
                 HStack {
                     Button("Show in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([store.storeURL])
@@ -38,8 +38,8 @@ struct SettingsView: View {
                         }
                     }
                 }
-            }
-        }
+            }.padding()
+        }.listStyle(.plain)
     }
 }
 

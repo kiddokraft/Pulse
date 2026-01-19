@@ -32,8 +32,11 @@ struct ConsoleSessionsPickerView: View {
             Button("Select...") { isShowingPicker = true }
         }
         .popover(isPresented: $isShowingPicker, arrowEdge: .trailing) {
-            SessionPickerView(selection: $selection)
-                .frame(width: 260, height: 370)
+            List{
+                SessionPickerView(selection: $selection)
+                    .frame(width: 300, height: 300)
+            }.listStyle(.plain)
+                .frame(width: 310, height: 310)
 
         }
 #else
