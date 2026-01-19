@@ -57,14 +57,14 @@ private struct ConsoleMainView: View {
                     contentToolbarNavigationItems
                 }
                 ToolbarItemGroup(placement: .automatic) {
-//                    Button(action: { isShowingFilters = true }) {
-//                        Label("Filter", systemImage: "line.3.horizontal.decrease")
-//                    }
-//                    .popover(isPresented: $isShowingFilters) {
-//                        ConsoleFiltersView()
-//                            
-//                            .frame(width: 300).fixedSize()
-//                    }
+                    Button(action: { isShowingFilters = true }) {
+                        Label("Filter", systemImage: "line.3.horizontal.decrease")
+                    }
+                    .popover(isPresented: $isShowingFilters) {
+                        ConsoleFiltersView()
+                            
+                            .frame(width: 500, height: 650)
+                    }
 //                    Button(action: { isShowingSessions = true }) {
 //                        Label("Show Sessions", systemImage: "tray.full")
 //                    }
@@ -75,7 +75,7 @@ private struct ConsoleMainView: View {
                         Label("More", systemImage: "ellipsis")
                     }
                     .popover(isPresented: $isShowingSettings) {
-                        SettingsView().frame(width: 300, height: 420)
+                        SettingsView().frame(width: 300)
                     }
                 }
             }

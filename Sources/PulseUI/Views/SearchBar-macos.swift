@@ -31,8 +31,9 @@ struct SearchBar: View {
                 }
         }
         .padding(.horizontal, 8).padding(.vertical, 4)
-        .background {
+        .overlay {
             RoundedRectangle(cornerRadius: 6).foregroundStyle(Color.primary.opacity(0.1))
+                .allowsHitTesting(false)
         }
     }
 }

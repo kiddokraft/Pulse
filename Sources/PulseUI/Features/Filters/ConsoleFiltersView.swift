@@ -20,8 +20,8 @@ struct ConsoleFiltersView: View {
         .navigationBarItems(leading: buttonReset)
 #endif
 #else
-        VStack {
-            ScrollView {
+        List{
+            VStack {
                 Spacer()
                 form
                 HStack {
@@ -32,14 +32,15 @@ struct ConsoleFiltersView: View {
                     buttonReset
                 }
                 .padding(.horizontal, 10)
-              
-                .frame(height: 34, alignment: .center)
+                
+                //                .frame(height: 34, alignment: .center)
                 Spacer()
                 
-             
+                
             }.scrollIndicators(.hidden)
-               
+                .padding(0)
         }
+        
 #endif
     }
 
