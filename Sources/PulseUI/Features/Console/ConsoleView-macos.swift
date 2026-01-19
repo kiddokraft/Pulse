@@ -95,8 +95,12 @@ private struct ConsoleMainView: View {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
             .popover(isPresented: $isSharingStore, arrowEdge: .bottom) {
-                ShareStoreView(onDismiss: {})
-                    .frame(width: 240).fixedSize()
+                List {
+                    ShareStoreView(onDismiss: {})
+                        .padding(10)
+                        .frame(width: 300, height: 140)
+                }.listStyle(.plain)
+                .frame(width: 320, height: 160)
             }
             Button(action: { environment.store.removeAll() }) {
                 Label("Clear", systemImage: "trash")

@@ -65,14 +65,14 @@ struct ShareView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        List {
             let services = NSSharingService.sharingServices(forItems: items.items)
             ForEach(services, id: \.title) { service in
                 Item(item: service) {
                     service.perform(withItems: items.items)
                 }
             }
-        }.padding(4)
+        }.listStyle(.inset)
     }
 
     private struct Item: View {

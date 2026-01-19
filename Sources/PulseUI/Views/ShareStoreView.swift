@@ -22,15 +22,17 @@ struct ShareStoreView: View {
     @Environment(\.store) private var store: LoggerStore
 
     var body: some View {
-        content
-            .onAppear {
-                if !sessions.isEmpty {
-                    viewModel.sessions = sessions
-                } else if viewModel.sessions.isEmpty {
-                    viewModel.sessions = [store.session.id]
+
+            content
+                .onAppear {
+                    if !sessions.isEmpty {
+                        viewModel.sessions = sessions
+                    } else if viewModel.sessions.isEmpty {
+                        viewModel.sessions = [store.session.id]
+                    }
+                    viewModel.store = store
                 }
-                viewModel.store = store
-            }
+        
     }
 
     @ViewBuilder
@@ -67,8 +69,8 @@ struct ShareStoreView: View {
                 ShareView($0)
             }
         }
-        .listStyle(.sidebar)
-        .padding()
+//        .listStyle(.sidebar)
+//        .padding()
         .popover(isPresented: $isShowingLabelPicker, arrowEdge: .trailing) {
             destinationLogLevels.padding()
         }
@@ -127,6 +129,7 @@ struct ShareStoreView: View {
                 }
 #else
                 Text(viewModel.isPreparingForSharing ? "Exporting..." : "Share")
+                    .foregroundStyle(Color.primary)
 #endif
             }
             .disabled(viewModel.isPreparingForSharing)
