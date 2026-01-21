@@ -176,6 +176,32 @@ extension NetworkTaskEntity {
     var connectionChain: String? {
         response?.headers["Connection-Chain"]
     }
+
+    /// Connection duration in seconds (calculated from createdAt/closedAt timestamps)
+    var connectionDuration: TimeInterval? {
+        guard let durationStr = response?.headers["Connection-Duration"],
+              let duration = Double(durationStr) else {
+            return nil
+        }
+        return duration
+    }
+
+    /// Connection start timestamp (nanoseconds since epoch)
+    var connectionStart: Int64? {
+        guard let startStr = response?.headers["Connection-Start"],
+              let start = Int64(startStr) else {
+            return nil
+        }
+        return start
+    }
+
+    /// Returns the effective duration for display - uses connectionDuration for connections, otherwise task.duration
+    var effectiveDuration: TimeInterval {
+        if isConnection, let connDuration = connectionDuration {
+            return connDuration
+        }
+        return duration
+    }
 }
 
 extension LoggerMessageEntity {

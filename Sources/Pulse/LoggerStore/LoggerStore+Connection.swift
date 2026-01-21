@@ -88,7 +88,15 @@ extension LoggerStore {
 
         // Store connection metadata in request headers
         request.setValue(connection.network, forHTTPHeaderField: "Connection-Network")
-        request.setValue("IPv\(connection.ipVersion)", forHTTPHeaderField: "Connection-IP-Version")
+        // IP version: 0 = FakeIP (DNS technique), 4 = IPv4, 6 = IPv6
+        let ipVersionString: String
+        switch connection.ipVersion {
+        case 0: ipVersionString = "FakeIP"
+        case 4: ipVersionString = "IPv4"
+        case 6: ipVersionString = "IPv6"
+        default: ipVersionString = "IPv\(connection.ipVersion)"
+        }
+        request.setValue(ipVersionString, forHTTPHeaderField: "Connection-IP-Version")
         request.setValue(connection.source, forHTTPHeaderField: "Connection-Source")
         request.setValue(connection.destination, forHTTPHeaderField: "Connection-Destination")
         if !connection.domain.isEmpty {
@@ -109,6 +117,15 @@ extension LoggerStore {
         responseHeaders["Connection-Download"] = formatBytes(connection.downlinkTotal)
         if !connection.chain.isEmpty {
             responseHeaders["Connection-Chain"] = connection.chain.joined(separator: " → ")
+        }
+
+        // Store timing info (timestamps are in nanoseconds from sing-box)
+        responseHeaders["Connection-Start"] = String(connection.createdAt)
+        if connection.closedAt > 0 {
+            // Calculate duration in seconds
+            let durationNs = connection.closedAt - connection.createdAt
+            let durationSeconds = Double(durationNs) / 1_000_000_000.0
+            responseHeaders["Connection-Duration"] = String(format: "%.3f", durationSeconds)
         }
 
         let response = HTTPURLResponse(
