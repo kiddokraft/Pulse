@@ -96,6 +96,20 @@ private func makePredicates(for criteria: ConsoleFilers.Network) -> [NSPredicate
         }
     }
 
+    // Connection state filter (for .connection mode)
+    // statusCode 102 = active, 200 = complete
+    if criteria.connectionState.isEnabled {
+        var statusCodes: [Int16] = []
+        if criteria.connectionState.showActive {
+            statusCodes.append(102)
+        }
+        if criteria.connectionState.showComplete {
+            statusCodes.append(200)
+        }
+        if !statusCodes.isEmpty && statusCodes.count < 2 {
+            predicates.append(NSPredicate(format: "statusCode IN %@", statusCodes))
+        }
+    }
 
 #if PULSE_STANDALONE_APP
     predicates += makeStandalonePredicates(for: criteria)

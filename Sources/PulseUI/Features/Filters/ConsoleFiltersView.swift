@@ -60,6 +60,10 @@ struct ConsoleFiltersView: View {
 #endif
             domainsSection
 
+            if environment.mode == .connection {
+                connectionStateSection
+            }
+
 #if PULSE_STANDALONE_APP
             responseSection
             networkingSection
@@ -126,6 +130,15 @@ extension ConsoleFiltersView {
             ConsoleSectionHeader(icon: "server.rack", title: "Hosts", filter: $viewModel.criteria.network.host)
         }, content: {
             ConsoleDomainsSelectionView(viewModel: viewModel)
+        })
+    }
+
+    var connectionStateSection: some View {
+        ConsoleSection(header: {
+            ConsoleSectionHeader(icon: "link", title: "State", filter: $viewModel.criteria.network.connectionState)
+        }, content: {
+            Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive)
+            Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete)
         })
     }
 }

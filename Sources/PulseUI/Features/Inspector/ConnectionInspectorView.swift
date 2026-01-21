@@ -88,7 +88,7 @@ struct ConnectionInspectorView: View {
     }
 }
 
-// MARK: - Connection Header View
+// MARK: - Connection Header View (Simplified like macOS)
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionHeaderView: View {
@@ -96,11 +96,10 @@ private struct ConnectionHeaderView: View {
     @State private var isPulsing = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Connection state with gentle indicator for connected state
+        VStack(spacing: 12) {
+            // Status with indicator
             HStack(spacing: 8) {
                 if task.connectionState == .connected {
-                    // Gentle breathing indicator - slow and calming
                     Circle()
                         .fill(task.connectionState.tintColor)
                         .frame(width: 10, height: 10)
@@ -115,130 +114,50 @@ private struct ConnectionHeaderView: View {
                 Text(task.connectionState.title)
                     .font(.headline)
                     .foregroundColor(task.connectionState.tintColor)
-            }
-
-            // Protocol badges
-            HStack(spacing: 8) {
-                Text(task.httpMethod ?? "TCP")
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.2))
-                    .foregroundColor(.blue)
-                    .cornerRadius(4)
 
                 if let ipVersion = task.connectionIPVersion {
+                    Text("•")
+                        .foregroundColor(.secondary)
                     Text(ipVersion)
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.2))
-                        .foregroundColor(.purple)
-                        .cornerRadius(4)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
 
-            // Transfer info or activity spinner for active connections
-            if task.connectionState == .connected {
-                ConnectionActiveIndicatorView(task: task)
-            } else {
-                ConnectionTransferInfoView(task: task)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-    }
-}
-
-// MARK: - Connection Active Indicator View
-
-@available(iOS 15, visionOS 1.0, *)
-private struct ConnectionActiveIndicatorView: View {
-    @ObservedObject var task: NetworkTaskEntity
-    @State private var isAnimating = false
-
-    var body: some View {
-        VStack(spacing: 12) {
-            // Calm connected icon with gentle animation
-            Image(systemName: "link.circle.fill")
-                .font(.system(size: 36))
-                .foregroundColor(.orange)
-                .opacity(isAnimating ? 0.6 : 1.0)
-                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
-                .onAppear { isAnimating = true }
-
-            // Show live traffic stats
-            HStack(spacing: 24) {
+            // Transfer summary
+            HStack(spacing: 16) {
                 HStack(spacing: 4) {
-                    Image(systemName: "arrow.up.circle")
-                        .font(.title3)
+                    Image(systemName: "arrow.up")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                     Text(task.connectionUpload ?? "0 KB")
                         .font(.subheadline.monospacedDigit())
+                        .foregroundColor(.secondary)
                 }
 
                 HStack(spacing: 4) {
-                    Image(systemName: "arrow.down.circle")
-                        .font(.title3)
+                    Image(systemName: "arrow.down")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                     Text(task.connectionDownload ?? "0 KB")
                         .font(.subheadline.monospacedDigit())
+                        .foregroundColor(.secondary)
+                }
+
+                if task.effectiveDuration > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(DurationFormatter.string(from: task.effectiveDuration))
+                            .font(.subheadline.monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         }
-        .padding(.top, 4)
-    }
-}
-
-// MARK: - Connection Transfer Info View (Network Style)
-
-@available(iOS 15, visionOS 1.0, *)
-private struct ConnectionTransferInfoView: View {
-    @ObservedObject var task: NetworkTaskEntity
-
-    var body: some View {
-        HStack {
-            Spacer()
-            uploadView
-            Spacer()
-
-            Divider()
-                .frame(height: 50)
-
-            Spacer()
-            downloadView
-            Spacer()
-        }
-    }
-
-    private var uploadView: some View {
-        VStack {
-            HStack(alignment: .center, spacing: nil) {
-                Image(systemName: "arrow.up.circle")
-                    .font(.largeTitle)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Sent").font(.headline)
-                    Text(task.connectionUpload ?? "0 KB").font(.headline)
-                }
-            }
-            .fixedSize()
-            .padding(2)
-        }
-    }
-
-    private var downloadView: some View {
-        VStack {
-            HStack(alignment: .center, spacing: nil) {
-                Image(systemName: "arrow.down.circle")
-                    .font(.largeTitle)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Received").font(.headline)
-                    Text(task.connectionDownload ?? "0 KB").font(.headline)
-                }
-            }
-            .fixedSize()
-            .padding(2)
-        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
     }
 }
 
@@ -557,8 +476,21 @@ struct ConnectionInspectorView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            // Single text view with all content
-            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionFull(task, store: store) }))
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Text content
+                    RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionFull(task, store: store) }))
+
+                    // Timing graph (like iOS)
+                    if task.effectiveDuration > 0 {
+                        Divider()
+                            .padding(.vertical, 8)
+                        ConnectionTimingViewMac(task: task)
+                            .padding(.horizontal, 12)
+                            .padding(.bottom, 12)
+                    }
+                }
+            }
         }
     }
 
@@ -573,6 +505,90 @@ struct ConnectionInspectorView: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 27, alignment: .center)
+    }
+}
+
+// MARK: - macOS Timing View
+
+@available(macOS 13, *)
+private struct ConnectionTimingViewMac: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Timing")
+                .font(.headline)
+                .foregroundColor(.secondary)
+
+            TimingView(viewModel: makeTimingViewModel())
+        }
+    }
+
+    private func makeTimingViewModel() -> TimingViewModel {
+        let duration = task.effectiveDuration
+        let durationStr = DurationFormatter.string(from: duration)
+
+        var rows: [TimingRowViewModel] = []
+
+        // Connection duration bar
+        let color: UXColor = task.connectionState == .connected ? .systemOrange : .systemGreen
+        rows.append(TimingRowViewModel(
+            title: "Connection",
+            value: durationStr,
+            color: color,
+            start: 0.0,
+            length: 1.0
+        ))
+
+        // Add upload/download visualization if we have data
+        if task.connectionState == .complete,
+           let upload = task.connectionUpload,
+           let download = task.connectionDownload {
+            let uploadBytes = parseBytes(upload)
+            let downloadBytes = parseBytes(download)
+            let totalBytes = uploadBytes + downloadBytes
+
+            if totalBytes > 0 {
+                let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
+
+                rows.append(TimingRowViewModel(
+                    title: "Upload",
+                    value: upload,
+                    color: .systemBlue,
+                    start: 0.0,
+                    length: uploadRatio
+                ))
+
+                rows.append(TimingRowViewModel(
+                    title: "Download",
+                    value: download,
+                    color: .systemPurple,
+                    start: uploadRatio,
+                    length: 1.0 - uploadRatio
+                ))
+            }
+        }
+
+        let section = TimingRowSectionViewModel(title: "Timeline", items: rows)
+        return TimingViewModel(sections: [section])
+    }
+
+    private func parseBytes(_ string: String) -> Int64 {
+        let components = string.components(separatedBy: " ")
+        guard components.count >= 2,
+              let value = Double(components[0]) else {
+            return 0
+        }
+        let unit = components[1].uppercased()
+        let multiplier: Int64
+        switch unit {
+        case "B", "BYTES": multiplier = 1
+        case "KB": multiplier = 1024
+        case "MB": multiplier = 1024 * 1024
+        case "GB": multiplier = 1024 * 1024 * 1024
+        default: multiplier = 1
+        }
+        return Int64(value * Double(multiplier))
     }
 }
 
