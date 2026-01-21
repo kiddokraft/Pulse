@@ -24,7 +24,8 @@ struct ConnectionInspectorView: View {
         VStack(spacing: 0){
             VStack(spacing: 0){
                 ConnectionTimingView(task: task).padding()
-            }.background(Color.gray.opacity(0.1))
+            }
+            Divider()
             List {
                 contents
             }
