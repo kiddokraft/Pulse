@@ -98,18 +98,15 @@ private struct _ConsoleTaskCell: View {
             PinButton(viewModel: .init(task)).tint(.pink)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            // Only show share for regular network tasks, not connections
-            if !task.isConnection {
-                Button(action: {
+            Button(action: {
 #if os(iOS) || os(visionOS)
-                    shareItems = ShareService.share(task, as: .html, store: store)
+                shareItems = ShareService.share(task, as: .html, store: store)
 #else
-                    sharedTask = task
+                sharedTask = task
 #endif
-                }) {
-                    Label("Share", systemImage: "square.and.arrow.up.fill")
-                }.tint(.blue)
-            }
+            }) {
+                Label("Share", systemImage: "square.and.arrow.up.fill")
+            }.tint(.blue)
         }
         .contextMenu {
             // Use connection-specific context menu for connections
