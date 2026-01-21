@@ -16,9 +16,7 @@ import Combine
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
 
-    @State private var shareItems: ShareItems?
     @EnvironmentObject private var environment: ConsoleEnvironment
-    @Environment(\.store) private var store
 
     var body: some View {
         List {
@@ -31,7 +29,6 @@ struct ConnectionInspectorView: View {
             }
         }
         .inlineNavigationTitle(task.connectionDomain ?? task.host ?? "Connection")
-        .sheet(item: $shareItems, content: ShareView.init)
     }
 
     @ViewBuilder
@@ -69,15 +66,6 @@ struct ConnectionInspectorView: View {
     @ViewBuilder
     private var trailingNavigationBarItems: some View {
         PinButton(viewModel: PinButtonViewModel(task), isTextNeeded: false)
-        Menu(content: {
-            AttributedStringShareMenu(shareItems: $shareItems) {
-                TextRenderer(options: .sharing).make {
-                    $0.render(task, content: .sharing, store: store)
-                }
-            }
-        }, label: {
-            Image(systemName: "square.and.arrow.up")
-        })
     }
 }
 
@@ -306,9 +294,6 @@ import Combine
 @available(macOS 13, *)
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
-
-    @State private var shareItems: ShareItems?
-    @Environment(\.store) private var store
 
     var body: some View {
         List {

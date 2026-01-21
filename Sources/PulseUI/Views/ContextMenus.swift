@@ -214,6 +214,71 @@ enum ContextMenu {
             }
         }
     }
+
+    // MARK: - Connection Context Menu
+
+    /// Context menu for proxy/VPN connections (TCP/UDP).
+    /// Simplified menu without HTTP-specific options like cURL, Request, Response.
+    struct ConnectionContextMenuItems: View {
+        let task: NetworkTaskEntity
+
+        var body: some View {
+            Section {
+                ConnectionCopyMenu(task: task)
+            }
+            if let message = task.message {
+                Section {
+                    PinButton(viewModel: .init(message))
+                }
+            }
+        }
+    }
+
+    struct ConnectionCopyMenu: View {
+        let task: NetworkTaskEntity
+
+        var body: some View {
+            Menu(content: content) {
+                Label("Copy", systemImage: "doc.on.doc")
+            }
+        }
+
+        @ViewBuilder
+        func content() -> some View {
+            if let domain = task.connectionDomain, !domain.isEmpty {
+                Button(action: {
+                    UXPasteboard.general.string = domain
+                    runHapticFeedback()
+                }) {
+                    Label("Copy Domain", systemImage: "doc.on.doc")
+                }
+            }
+            if let destination = task.connectionDestination, !destination.isEmpty {
+                Button(action: {
+                    UXPasteboard.general.string = destination
+                    runHapticFeedback()
+                }) {
+                    Label("Copy Destination", systemImage: "doc.on.doc")
+                }
+            }
+            if let source = task.connectionSource, !source.isEmpty {
+                Button(action: {
+                    UXPasteboard.general.string = source
+                    runHapticFeedback()
+                }) {
+                    Label("Copy Source", systemImage: "doc.on.doc")
+                }
+            }
+            if let rule = task.connectionRule, !rule.isEmpty {
+                Button(action: {
+                    UXPasteboard.general.string = rule
+                    runHapticFeedback()
+                }) {
+                    Label("Copy Rule", systemImage: "doc.on.doc")
+                }
+            }
+        }
+    }
 }
 
 struct StringSearchOptionsMenu: View {
