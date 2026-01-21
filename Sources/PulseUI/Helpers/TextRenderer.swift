@@ -206,7 +206,7 @@ final class TextRenderer {
     func renderConnectionSummary(_ task: NetworkTaskEntity, store: LoggerStore) {
         // Header with status
         let statusTitle = task.connectionState == .complete ? "Complete" : "Active"
-        let statusColor = task.connectionState == .complete ? UXColor.systemGreen : UXColor.systemOrange
+        let statusColor = task.connectionState == .complete ? UXColor.systemGreen : UXColor.systemPurple
         string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
         string.append(spacer())
 
