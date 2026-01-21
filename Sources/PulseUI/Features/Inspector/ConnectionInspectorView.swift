@@ -482,9 +482,11 @@ struct ConnectionInspectorView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            RichTextView(viewModel: makeSummaryViewModel())
+            ConnectionTimingViewMac(task: task)
             Divider()
-            ConnectionTimingViewMac(task: task).frame(height: 80)
+            RichTextView(viewModel: makeSummaryViewModel())
+           
+            
         }
     }
 
@@ -517,19 +519,9 @@ private struct ConnectionTimingViewMac: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-          
-            // Timing graph
-            VStack(alignment: .leading, spacing: 8) {
-           
+        TimingView(viewModel: makeTimingViewModel())
+                    .padding()
 
-                TimingView(viewModel: makeTimingViewModel())
-                    .frame(minHeight: 80)
-            }
-
-            Spacer()
-        }
-        .padding()
     }
 
     private func makeTimingViewModel() -> TimingViewModel {

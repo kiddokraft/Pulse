@@ -711,6 +711,103 @@ enum MockConnection {
             closedAt: Date().addingTimeInterval(-100),
             chain: ["proxy-hk", "relay-tw"]
         ),
+
+        // More completed connections with larger data
+        MockConnectionInfo(
+            id: "conn-11",
+            network: "tcp",
+            source: "192.168.1.100:52351",
+            destination: "199.232.68.133:443",
+            domain: "cdn.jsdelivr.net",
+            connectionProtocol: "tls",
+            inbound: "tun",
+            inboundType: "tun",
+            outbound: "direct",
+            outboundType: "direct",
+            rule: "DOMAIN-SUFFIX:jsdelivr.net",
+            ipVersion: 4,
+            uplinkTotal: 1024,
+            downlinkTotal: 5242880, // 5MB download
+            createdAt: Date().addingTimeInterval(-50),
+            closedAt: Date().addingTimeInterval(-10),
+            chain: []
+        ),
+        MockConnectionInfo(
+            id: "conn-12",
+            network: "tcp",
+            source: "192.168.1.100:52352",
+            destination: "140.82.114.4:443",
+            domain: "github.com",
+            connectionProtocol: "tls",
+            inbound: "tun",
+            inboundType: "tun",
+            outbound: "direct",
+            outboundType: "direct",
+            rule: "DOMAIN:github.com",
+            ipVersion: 4,
+            uplinkTotal: 2048000, // 2MB upload
+            downlinkTotal: 512000, // 500KB download
+            createdAt: Date().addingTimeInterval(-80),
+            closedAt: Date().addingTimeInterval(-20),
+            chain: []
+        ),
+        MockConnectionInfo(
+            id: "conn-13",
+            network: "tcp",
+            source: "192.168.1.100:52353",
+            destination: "52.84.125.100:443",
+            domain: "cloudfront.net",
+            connectionProtocol: "tls",
+            inbound: "tun",
+            inboundType: "tun",
+            outbound: "proxy-us",
+            outboundType: "vmess",
+            rule: "GEOSITE:amazon",
+            ipVersion: 4,
+            uplinkTotal: 4096,
+            downlinkTotal: 20971520, // 20MB download
+            createdAt: Date().addingTimeInterval(-200),
+            closedAt: Date().addingTimeInterval(-50),
+            chain: ["proxy-us", "relay-eu"]
+        ),
+        MockConnectionInfo(
+            id: "conn-14",
+            network: "tcp",
+            source: "192.168.1.100:52354",
+            destination: "151.101.128.81:443",
+            domain: "reddit.com",
+            connectionProtocol: "tls",
+            inbound: "tun",
+            inboundType: "tun",
+            outbound: "proxy-jp",
+            outboundType: "trojan",
+            rule: "GEOSITE:reddit",
+            ipVersion: 0, // FakeIP
+            uplinkTotal: 8192,
+            downlinkTotal: 1048576, // 1MB
+            createdAt: Date().addingTimeInterval(-70),
+            closedAt: Date().addingTimeInterval(-25),
+            chain: ["proxy-jp"]
+        ),
+        MockConnectionInfo(
+            id: "conn-15",
+            network: "tcp",
+            source: "192.168.1.100:52355",
+            destination: "216.58.214.14:443",
+            domain: "drive.google.com",
+            connectionProtocol: "tls",
+            inbound: "tun",
+            inboundType: "tun",
+            outbound: "proxy-hk",
+            outboundType: "shadowsocks",
+            rule: "GEOSITE:google",
+            ipVersion: 4,
+            uplinkTotal: 52428800, // 50MB upload
+            downlinkTotal: 1024,
+            createdAt: Date().addingTimeInterval(-400),
+            closedAt: Date().addingTimeInterval(-100),
+            chain: ["proxy-hk"]
+        ),
     ]
 }
 
