@@ -21,10 +21,15 @@ struct ConnectionInspectorView: View {
     @Environment(\.store) private var store
 
     var body: some View {
-        List {
-            contents
+        VStack(spacing: 0){
+            VStack(spacing: 0){
+                ConnectionTimingView(task: task).padding()
+            }.background(Color.gray.opacity(0.1))
+            List {
+                contents
+            }
+            .listStyle(.insetGrouped)
         }
-        .listStyle(.insetGrouped)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 trailingNavigationBarItems
@@ -44,9 +49,9 @@ struct ConnectionInspectorView: View {
 //        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
 //        .listRowBackground(Color.clear)
         
-        ConnectionTimingView(task: task)
+    
 //            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowBackground(Color.clear)
+//            .listRowBackground(Color.clear)
 
         // Connection Status
         Section {
