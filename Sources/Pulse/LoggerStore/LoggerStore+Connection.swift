@@ -119,12 +119,12 @@ extension LoggerStore {
             responseHeaders["Connection-Chain"] = connection.chain.joined(separator: " → ")
         }
 
-        // Store timing info (timestamps are in nanoseconds from sing-box)
+        // Store timing info (timestamps are in milliseconds from sing-box)
         responseHeaders["Connection-Start"] = String(connection.createdAt)
         if connection.closedAt > 0 {
-            // Calculate duration in seconds
-            let durationNs = connection.closedAt - connection.createdAt
-            let durationSeconds = Double(durationNs) / 1_000_000_000.0
+            // Calculate duration in seconds (timestamps are milliseconds)
+            let durationMs = connection.closedAt - connection.createdAt
+            let durationSeconds = Double(durationMs) / 1000.0
             responseHeaders["Connection-Duration"] = String(format: "%.3f", durationSeconds)
         }
 

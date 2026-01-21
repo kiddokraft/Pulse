@@ -286,12 +286,14 @@ import Foundation
                  commandClient.rawConnections = message
                  commandClient.connections = filteredConnections
 
-                 // Store connections to Pulse (both active and closed)
+                 // Store only closed connections to Pulse (avoids duplicates)
+                 // Active connections are shown in the live Connections view,
+                 // Pulse shows the historical log of completed connections
                  for connection in allConnections {
-                     let connectionKey = "\(connection.id_)_\(connection.closedAt > 0 ? "closed" : "active")"
-                     if !commandClient.storedConnectionIds.contains(connectionKey) {
+                     if connection.closedAt > 0 &&
+                        !commandClient.storedConnectionIds.contains(connection.id_) {
                          LoggerStore.shared.storeConnection(connection)
-                         commandClient.storedConnectionIds.insert(connectionKey)
+                         commandClient.storedConnectionIds.insert(connection.id_)
                      }
                  }
              }
