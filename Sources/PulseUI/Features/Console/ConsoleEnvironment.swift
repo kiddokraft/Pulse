@@ -45,6 +45,7 @@ final class ConsoleEnvironment: ObservableObject {
         case .all: self.title = "Console"
         case .logs: self.title = "Logs"
         case .network: self.title = "Network"
+        case .connection: self.title = "Connection"
         }
         self.initialMode = mode
 
@@ -52,6 +53,7 @@ final class ConsoleEnvironment: ObservableObject {
         case .all: self.mode = UserSettings.shared.mode
         case .logs: self.mode = .logs
         case .network: self.mode = .network
+        case .connection: self.mode = .connection
         }
 
         self.delegate = delegate
@@ -120,6 +122,8 @@ public enum ConsoleMode: String {
     case logs
     /// Displays only network tasks.
     case network
+    /// Displays only connection.
+    case connection
 
     var hasLogs: Bool { self == .all || self == .logs }
     var hasNetwork: Bool { self == .all || self == .network }

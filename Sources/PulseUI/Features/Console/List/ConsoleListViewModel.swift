@@ -229,6 +229,7 @@ private func filter(pins: [LoggerMessageEntity], mode: ConsoleMode) -> [LoggerMe
         case .all: return true
         case .logs: return $0.task == nil
         case .network: return $0.task != nil
+        case .connection: return $0.task != nil
         }
     }
 }

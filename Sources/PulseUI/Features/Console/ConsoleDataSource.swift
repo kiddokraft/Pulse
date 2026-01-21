@@ -63,7 +63,7 @@ final class ConsoleDataSource: NSObject, NSFetchedResultsControllerDelegate {
             entityName = "\(LoggerMessageEntity.self)"
             sortKey = options.messageSortBy.key
             grouping = options.messageGroupBy
-        case .network:
+        case .network, .connection:
             entityName = "\(NetworkTaskEntity.self)"
             sortKey = options.taskSortBy.key
             grouping = options.taskGroupBy
@@ -190,6 +190,8 @@ private func _makePredicate(_ mode: ConsoleMode, _ filters: ConsoleFilers, _ isO
         return makeMessagesPredicate(isMessageOnly: true)
     case .network:
         return ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
+    case .connection:
+        return ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
     }
 }
 
@@ -209,6 +211,30 @@ private func makeName(for section: NSFetchedResultsSectionInfo, mode: ConsoleMod
             break
         }
     case .network:
+        switch options.taskGroupBy {
+        case .taskType:
+            let rawValue = Int16(Int(section.name) ?? 0)
+            return NetworkLogger.TaskType(rawValue: rawValue)?.urlSessionTaskClassName ?? section.name
+        case .statusCode:
+            let rawValue = Int32(section.name) ?? 0
+            return StatusCodeFormatter.string(for: rawValue)
+        case .requestState:
+            let rawValue = Int16(Int(section.name) ?? 0)
+            guard let state = NetworkTaskEntity.State(rawValue: rawValue) else {
+                return "Unknown State"
+            }
+            switch state {
+            case .pending: return "Pending"
+            case .success: return "Success"
+            case .failure: return "Failure"
+            }
+        case .session:
+            let date = (section.objects?.last as? NetworkTaskEntity)?.createdAt
+            return date.map(sessionDateFormatter.string) ?? "–"
+        default:
+            break
+        }
+    case .connection:
         switch options.taskGroupBy {
         case .taskType:
             let rawValue = Int16(Int(section.name) ?? 0)

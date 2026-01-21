@@ -46,7 +46,7 @@ struct ConsoleToolbarView: View {
         switch environment.initialMode {
         case .all:
             ConsoleModePicker(environment: environment)
-        case .logs, .network:
+        case .logs, .network, .connection:
             ConsoleToolbarTitle()
         }
         if !isVertical {
@@ -115,6 +115,9 @@ struct ConsoleModePicker: View {
 
     var body: some View {
         HStack(spacing: spacing) {
+            ConsoleModeButton(title: "Connection", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .connection) {
+                environment.mode = .connection
+            }
             ConsoleModeButton(title: "Network", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .network) {
                 environment.mode = .network
             }
