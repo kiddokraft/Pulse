@@ -31,6 +31,7 @@ struct ConnectionInspectorView: View {
                 contents
             }
             .listStyle(.inset)
+            .padding(.bottom, 30)
         }
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -76,6 +77,9 @@ struct ConnectionInspectorView: View {
                 ConnectionTrafficView(task: task)
             }
         }
+        
+       
+        
 
         // Timing
 //        if task.effectiveDuration > 0 {
