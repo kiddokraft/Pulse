@@ -321,6 +321,8 @@ private struct ConnectionTrafficView: View {
     var body: some View {
         if let upload = task.connectionUpload {
             HStack {
+                Label("Upload", systemImage: "arrow.up").foregroundColor(.primary)
+                Spacer()
                 Text(upload)
                     .foregroundColor(.secondary)
                     .monospacedDigit()
@@ -329,6 +331,8 @@ private struct ConnectionTrafficView: View {
 
         if let download = task.connectionDownload {
             HStack {
+                Label("Download", systemImage: "arrow.down")  .foregroundColor(.primary)
+                Spacer()
                 Text(download)
                     .foregroundColor(.secondary)
                     .monospacedDigit()
