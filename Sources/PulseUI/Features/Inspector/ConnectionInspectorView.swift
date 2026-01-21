@@ -59,7 +59,7 @@ struct ConnectionInspectorView: View {
         }
 
         // Traffic Statistics
-        if task.connectionState == .closed {
+        if task.connectionState == .complete {
             Section("Traffic") {
                 ConnectionTrafficView(task: task)
             }
@@ -386,7 +386,7 @@ private struct ConnectionTimingView: View {
                     }
                 }
 
-                if task.connectionState == .closed, task.effectiveDuration > 0 {
+                if task.connectionState == .complete, task.effectiveDuration > 0 {
                     HStack {
                         Text("Duration")
                             .foregroundColor(.secondary)
@@ -424,7 +424,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .active ? .systemGreen : .systemGray
+        let color: UXColor = task.connectionState == .pending ? .systemOrange : .systemGreen
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
@@ -434,7 +434,7 @@ private struct ConnectionTimingView: View {
         ))
 
         // Add upload/download visualization if we have data
-        if task.connectionState == .closed,
+        if task.connectionState == .complete,
            let upload = task.connectionUpload,
            let download = task.connectionDownload {
             let uploadBytes = parseBytes(upload)
@@ -731,7 +731,7 @@ private struct ConnectionTimingView: View {
                 ConnectionRow(title: "Started", value: DateFormatter.localizedString(from: time, dateStyle: .none, timeStyle: .medium))
             }
 
-            if task.connectionState == .closed, task.effectiveDuration > 0 {
+            if task.connectionState == .complete, task.effectiveDuration > 0 {
                 ConnectionRow(title: "Duration", value: DurationFormatter.string(from: task.effectiveDuration))
 
                 // Transfer rate
@@ -754,7 +754,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .active ? .systemGreen : .systemGray
+        let color: UXColor = task.connectionState == .pending ? .systemOrange : .systemGreen
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
@@ -764,7 +764,7 @@ private struct ConnectionTimingView: View {
         ))
 
         // Add upload/download visualization if we have data
-        if task.connectionState == .closed,
+        if task.connectionState == .complete,
            let upload = task.connectionUpload,
            let download = task.connectionDownload {
             let uploadBytes = parseBytes(upload)

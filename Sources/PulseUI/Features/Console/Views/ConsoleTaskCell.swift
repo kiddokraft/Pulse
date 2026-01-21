@@ -141,7 +141,7 @@ struct ConsoleTaskCell: View {
 
     private var connectionInfoText: Text {
         var text = Text(task.httpMethod ?? "TCP")
-        if task.connectionState == .closed {
+        if task.connectionState == .complete {
             let upload = task.connectionUpload ?? "0 KB"
             let download = task.connectionDownload ?? "0 KB"
             text = text + Text("    ") +

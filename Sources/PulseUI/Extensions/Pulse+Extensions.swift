@@ -72,35 +72,35 @@ extension NetworkTaskEntity {
         return method == "TCP" || method == "UDP"
     }
 
-    /// Returns the connection state: Active (status 102) or Closed (status 200).
+    /// Returns the connection state: Pending (status 102) or Complete (status 200).
     var connectionState: ConnectionState {
-        // Status 102 = Processing (active), 200 = OK (closed)
-        statusCode == 200 ? .closed : .active
+        // Status 102 = Processing (pending), 200 = OK (complete)
+        statusCode == 200 ? .complete : .pending
     }
 
     /// Connection state for proxy/VPN connections.
     enum ConnectionState {
-        case active
-        case closed
+        case pending   // Connection is active/ongoing
+        case complete  // Connection has finished
 
         var title: String {
             switch self {
-            case .active: return "Active"
-            case .closed: return "Closed"
+            case .pending: return "Pending"
+            case .complete: return "Complete"
             }
         }
 
         var tintColor: Color {
             switch self {
-            case .active: return .green
-            case .closed: return .gray
+            case .pending: return .orange
+            case .complete: return .green
             }
         }
 
         var iconSystemName: String {
             switch self {
-            case .active: return "bolt.circle.fill"
-            case .closed: return "checkmark.circle.fill"
+            case .pending: return "clock.fill"
+            case .complete: return "checkmark.circle.fill"
             }
         }
     }

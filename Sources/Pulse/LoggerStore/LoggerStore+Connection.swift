@@ -68,15 +68,18 @@ extension LoggerStore {
         }
     }
 
-    /// Stores a proxy/VPN connection as a network task entry.
+    /// Stores or updates a proxy/VPN connection as a network task entry.
     ///
-    /// Connection tasks are differentiated from regular HTTP network tasks by using
-    /// TCP/UDP as the HTTP method. This allows filtering in the Console UI.
+    /// This method uses a stable UUID derived from the connection ID, allowing
+    /// the same connection to be updated when its state changes (active → closed).
     ///
-    /// - Parameter connection: The connection info to store.
+    /// - Parameter connection: The connection info to store or update.
     public func storeConnection(_ connection: ConnectionInfo) {
         // Skip DNS connections as they are typically internal
         guard connection.outboundType != "dns" else { return }
+
+        // Generate stable UUID from connection ID for update support
+        let taskId = stableUUID(from: connection.id)
 
         // Build URL from connection info
         let urlString = buildConnectionURL(from: connection)
@@ -87,7 +90,9 @@ extension LoggerStore {
         request.httpMethod = connection.network.uppercased()  // TCP or UDP
 
         // Store connection metadata in request headers
+        request.setValue(connection.id, forHTTPHeaderField: "Connection-ID")
         request.setValue(connection.network, forHTTPHeaderField: "Connection-Network")
+
         // IP version: 0 = FakeIP (DNS technique), 4 = IPv4, 6 = IPv6
         let ipVersionString: String
         switch connection.ipVersion {
@@ -128,9 +133,10 @@ extension LoggerStore {
             responseHeaders["Connection-Duration"] = String(format: "%.3f", durationSeconds)
         }
 
+        let isComplete = connection.closedAt > 0
         let response = HTTPURLResponse(
             url: url,
-            statusCode: connection.closedAt > 0 ? 200 : 102,  // 102 = Processing (ongoing)
+            statusCode: isComplete ? 200 : 102,  // 102 = Processing (pending), 200 = Complete
             httpVersion: "HTTP/1.1",
             headerFields: responseHeaders
         )
@@ -139,19 +145,33 @@ extension LoggerStore {
         let taskDescription = buildTaskDescription(from: connection)
         let label = "\(connection.inbound)/\(connection.inboundType)"
 
-        // Store using the existing network task storage mechanism
-        storeRequest(
-            request,
-            response: response,
+        // Use Pulse's event system with stable taskId for update support
+        handle(.networkTaskCompleted(.init(
+            taskId: taskId,
+            taskType: .dataTask,
+            createdAt: Date(timeIntervalSince1970: Double(connection.createdAt) / 1000.0),
+            originalRequest: NetworkLogger.Request(request),
+            currentRequest: NetworkLogger.Request(request),
+            response: response.map(NetworkLogger.Response.init),
             error: nil,
-            data: nil,
+            requestBody: nil,
+            responseBody: nil,
             metrics: nil,
             label: label,
             taskDescription: taskDescription
-        )
+        )))
     }
 
     // MARK: - Private Helpers
+
+    /// Generates a stable UUID from a string identifier.
+    /// This ensures the same connection ID always produces the same UUID.
+    private func stableUUID(from string: String) -> UUID {
+        // Use UUID v5 (name-based, SHA-1) with a custom namespace
+        // Namespace UUID for Pulse connections
+        let namespace = UUID(uuidString: "6ba7b810-9dad-11d1-80b4-00c04fd430c8")! // DNS namespace
+        return UUID(name: string, namespace: namespace)
+    }
 
     private func buildConnectionURL(from connection: ConnectionInfo) -> String {
         let scheme = connection.network  // "tcp" or "udp"
@@ -192,3 +212,57 @@ extension LoggerStore {
         return formatter.string(fromByteCount: bytes)
     }
 }
+
+// MARK: - UUID v5 Extension
+
+extension UUID {
+    /// Creates a UUID v5 (name-based, SHA-1) from a name and namespace.
+    init(name: String, namespace: UUID) {
+        // Convert namespace UUID to bytes
+        var namespaceBytes = [UInt8](repeating: 0, count: 16)
+        let uuid = namespace.uuid
+        namespaceBytes[0] = uuid.0
+        namespaceBytes[1] = uuid.1
+        namespaceBytes[2] = uuid.2
+        namespaceBytes[3] = uuid.3
+        namespaceBytes[4] = uuid.4
+        namespaceBytes[5] = uuid.5
+        namespaceBytes[6] = uuid.6
+        namespaceBytes[7] = uuid.7
+        namespaceBytes[8] = uuid.8
+        namespaceBytes[9] = uuid.9
+        namespaceBytes[10] = uuid.10
+        namespaceBytes[11] = uuid.11
+        namespaceBytes[12] = uuid.12
+        namespaceBytes[13] = uuid.13
+        namespaceBytes[14] = uuid.14
+        namespaceBytes[15] = uuid.15
+
+        // Concatenate namespace and name
+        let nameBytes = [UInt8](name.utf8)
+        let data = namespaceBytes + nameBytes
+
+        // Compute SHA-1 hash
+        var hash = [UInt8](repeating: 0, count: 20)
+        data.withUnsafeBytes { dataPtr in
+            hash.withUnsafeMutableBytes { hashPtr in
+                _ = CC_SHA1(dataPtr.baseAddress, CC_LONG(data.count), hashPtr.baseAddress?.assumingMemoryBound(to: UInt8.self))
+            }
+        }
+
+        // Set version (5) and variant bits
+        hash[6] = (hash[6] & 0x0F) | 0x50  // Version 5
+        hash[8] = (hash[8] & 0x3F) | 0x80  // Variant
+
+        // Create UUID from first 16 bytes of hash
+        self.init(uuid: (
+            hash[0], hash[1], hash[2], hash[3],
+            hash[4], hash[5], hash[6], hash[7],
+            hash[8], hash[9], hash[10], hash[11],
+            hash[12], hash[13], hash[14], hash[15]
+        ))
+    }
+}
+
+// Import CommonCrypto for SHA-1
+import CommonCrypto

@@ -286,15 +286,31 @@ import Foundation
                  commandClient.rawConnections = message
                  commandClient.connections = filteredConnections
 
-                 // Store only closed connections to Pulse (avoids duplicates)
-                 // Active connections are shown in the live Connections view,
-                 // Pulse shows the historical log of completed connections
+                 // Store connections to Pulse with update support
+                 // Uses stable UUID so the same connection updates in place
                  for connection in allConnections {
-                     if connection.closedAt > 0 &&
-                        !commandClient.storedConnectionIds.contains(connection.id_) {
-                         LoggerStore.shared.storeConnection(connection)
-                         commandClient.storedConnectionIds.insert(connection.id_)
+                     let connectionKey = connection.id_
+                     let isClosed = connection.closedAt > 0
+                     let wasStoredAsClosed = commandClient.storedConnectionIds.contains("\(connectionKey)_closed")
+
+                     // Skip if already stored as closed (final state)
+                     if wasStoredAsClosed {
+                         continue
                      }
+
+                     // Store/update the connection
+                     LoggerStore.shared.storeConnection(connection)
+
+                     // Track state to avoid redundant updates
+                     if isClosed {
+                         // Mark as closed (final state)
+                         commandClient.storedConnectionIds.insert("\(connectionKey)_closed")
+                         commandClient.storedConnectionIds.remove("\(connectionKey)_active")
+                     } else if !commandClient.storedConnectionIds.contains("\(connectionKey)_active") {
+                         // First time seeing as active
+                         commandClient.storedConnectionIds.insert("\(connectionKey)_active")
+                     }
+                     // Note: If already stored as active, we still update to refresh traffic stats
                  }
              }
          }

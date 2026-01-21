@@ -205,8 +205,8 @@ final class TextRenderer {
     /// Renders a connection-specific summary for proxy/VPN connections (TCP/UDP).
     func renderConnectionSummary(_ task: NetworkTaskEntity, store: LoggerStore) {
         // Header with status
-        let statusTitle = task.connectionState == .closed ? "Closed" : "Active"
-        let statusColor = task.connectionState == .closed ? UXColor.systemGray : UXColor.systemGreen
+        let statusTitle = task.connectionState == .complete ? "Complete" : "Pending"
+        let statusColor = task.connectionState == .complete ? UXColor.systemGreen : UXColor.systemOrange
         string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
         string.append(spacer())
 
@@ -265,7 +265,7 @@ final class TextRenderer {
         }
 
         // Traffic section (only for closed connections)
-        if task.connectionState == .closed {
+        if task.connectionState == .complete {
             var trafficItems: [(String, String?)] = []
             if let upload = task.connectionUpload {
                 trafficItems.append(("Upload", upload))
