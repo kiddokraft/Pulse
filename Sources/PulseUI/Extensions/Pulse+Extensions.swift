@@ -85,7 +85,7 @@ extension NetworkTaskEntity {
 
         var title: String {
             switch self {
-            case .connected: return "Connected"
+            case .connected: return "Active"
             case .complete: return "Complete"
             }
         }

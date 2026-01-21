@@ -83,11 +83,11 @@ struct ConsoleMessageDetailsView: View {
                 ("Level", LoggerStore.Level(rawValue: message.level)?.name),
                 ("Label", message.label.isEmpty ? nil : message.label)
             ]),
-            KeyValueSectionViewModel(title: "Details", color: .primary, items: [
-                ("File", message.file.isEmpty ? nil : message.file),
-                ("Function", message.function.isEmpty ? nil : message.function),
-                ("Line", message.line == 0 ? nil : "\(message.line)"),
-            ]),
+//            KeyValueSectionViewModel(title: "Details", color: .primary, items: [
+//                ("File", message.file.isEmpty ? nil : message.file),
+//                ("Function", message.function.isEmpty ? nil : message.function),
+//                ("Line", message.line == 0 ? nil : "\(message.line)"),
+//            ]),
             KeyValueSectionViewModel(title: "Metadata", color: .indigo, items: message.metadata.sorted(by: { $0.key < $1.key }).map { ($0.key, $0.value )})
         ]
         metadataRenderer.render(sections)
