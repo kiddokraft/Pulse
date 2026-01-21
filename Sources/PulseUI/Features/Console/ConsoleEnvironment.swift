@@ -20,6 +20,7 @@ final class ConsoleEnvironment: ObservableObject {
     let filters: ConsoleFiltersViewModel
     let logCountObserver: ManagedObjectsCountObserver
     let taskCountObserver: ManagedObjectsCountObserver
+    let connectionCountObserver: ManagedObjectsCountObserver
 
     let router = ConsoleRouter()
 
@@ -79,6 +80,12 @@ final class ConsoleEnvironment: ObservableObject {
             sortDescriptior: NSSortDescriptor(keyPath: \NetworkTaskEntity.createdAt, ascending: false)
         )
 
+        self.connectionCountObserver = ManagedObjectsCountObserver(
+            entity: NetworkTaskEntity.self,
+            context: store.viewContext,
+            sortDescriptior: NSSortDescriptor(keyPath: \NetworkTaskEntity.createdAt, ascending: false)
+        )
+
         bind()
     }
 
@@ -102,6 +109,7 @@ final class ConsoleEnvironment: ObservableObject {
         }
         logCountObserver.setPredicate(makePredicate(for: .logs))
         taskCountObserver.setPredicate(makePredicate(for: .network))
+        connectionCountObserver.setPredicate(makePredicate(for: .connection))
     }
 
     func removeAllLogs() {

@@ -100,11 +100,14 @@ struct ConsoleModePicker: View {
 
     @ObservedObject private var logsCounter: ManagedObjectsCountObserver
     @ObservedObject private var tasksCounter: ManagedObjectsCountObserver
+    @ObservedObject private var connectionCounter:
+        ManagedObjectsCountObserver
 
     init(environment: ConsoleEnvironment) {
         self.environment = environment
         self.logsCounter = environment.logCountObserver
         self.tasksCounter = environment.taskCountObserver
+        self.connectionCounter = environment.connectionCountObserver
     }
 
 #if os(macOS)
@@ -115,7 +118,7 @@ struct ConsoleModePicker: View {
 
     var body: some View {
         HStack(spacing: spacing) {
-            ConsoleModeButton(title: "Connection", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .connection) {
+            ConsoleModeButton(title: "Connection", details: CountFormatter.string(from: connectionCounter.count), isSelected: environment.mode == .connection) {
                 environment.mode = .connection
             }
             ConsoleModeButton(title: "Network", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .network) {

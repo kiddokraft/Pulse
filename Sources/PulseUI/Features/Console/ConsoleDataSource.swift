@@ -191,7 +191,14 @@ private func _makePredicate(_ mode: ConsoleMode, _ filters: ConsoleFilers, _ isO
     case .network:
         return ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
     case .connection:
-        return ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
+        // Only show connection tasks (TCP/UDP)
+        let connectionMethods = ["TCP", "UDP"]
+        let networkPredicate = ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
+        let connectionPredicate = NSPredicate(format: "httpMethod IN %@", connectionMethods)
+        if let networkPredicate = networkPredicate {
+            return NSCompoundPredicate(andPredicateWithSubpredicates: [networkPredicate, connectionPredicate])
+        }
+        return connectionPredicate
     }
 }
 
