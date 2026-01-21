@@ -186,6 +186,7 @@ private struct ConsoleModeButton: View {
 @available(iOS 15, visionOS 1.0, *)
 struct ConsoleListOptionsView: View {
     @EnvironmentObject private var filters: ConsoleFiltersViewModel
+    @EnvironmentObject private var environment: ConsoleEnvironment
 
     var body: some View {
 #if PULSE_STANDALONE_APP
@@ -193,6 +194,7 @@ struct ConsoleListOptionsView: View {
             .keyboardShortcut("e", modifiers: [.command, .shift])
             .help("Toggle Show Only Errors (⇧⌘E)")
 #elseif os(macOS)
+        sortOrderButton
         Button(action: { filters.options.isOnlyErrors.toggle() }) {
             Image(systemName: filters.options.isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
                 .foregroundColor(filters.options.isOnlyErrors ? .red : .primary)
@@ -211,6 +213,18 @@ struct ConsoleListOptionsView: View {
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
 #endif
     }
+
+#if os(macOS)
+    private var sortOrderButton: some View {
+        Button(action: {
+            environment.listOptions.order = environment.listOptions.order == .ascending ? .descending : .ascending
+        }) {
+            Image(systemName: environment.listOptions.order == .ascending ? "arrow.up" : "arrow.down")
+        }
+        .buttonStyle(.plain)
+        .help(environment.listOptions.order == .ascending ? "Sort Ascending" : "Sort Descending")
+    }
+#endif
 }
 
 #endif

@@ -115,6 +115,12 @@ private struct ConnectionHeaderView: View {
                     .font(.headline)
                     .foregroundColor(task.connectionState.tintColor)
 
+                Text("•")
+                    .foregroundColor(.secondary)
+                Text(task.httpMethod ?? "TCP")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
                 if let ipVersion = task.connectionIPVersion {
                     Text("•")
                         .foregroundColor(.secondary)
@@ -522,6 +528,7 @@ private struct ConnectionTimingViewMac: View {
 
             TimingView(viewModel: makeTimingViewModel())
         }
+        .frame(height: 120)
     }
 
     private func makeTimingViewModel() -> TimingViewModel {
