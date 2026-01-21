@@ -93,14 +93,26 @@ struct ConnectionInspectorView: View {
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionHeaderView: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var isPulsing = false
 
     var body: some View {
         VStack(spacing: 16) {
-            // Connection state with icon
+            // Connection state with animated indicator for active connections
             HStack(spacing: 8) {
-                Circle()
-                    .fill(task.connectionState.tintColor)
-                    .frame(width: 12, height: 12)
+                if task.connectionState == .active {
+                    // Pulsing indicator for active connections
+                    Circle()
+                        .fill(task.connectionState.tintColor)
+                        .frame(width: 12, height: 12)
+                        .scaleEffect(isPulsing ? 1.3 : 1.0)
+                        .opacity(isPulsing ? 0.6 : 1.0)
+                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
+                        .onAppear { isPulsing = true }
+                } else {
+                    Circle()
+                        .fill(task.connectionState.tintColor)
+                        .frame(width: 12, height: 12)
+                }
                 Text(task.connectionState.title)
                     .font(.headline)
                     .foregroundColor(task.connectionState.tintColor)
@@ -127,11 +139,52 @@ private struct ConnectionHeaderView: View {
                 }
             }
 
-            // Transfer info (similar to network metrics)
-            ConnectionTransferInfoView(task: task)
+            // Transfer info or activity spinner for active connections
+            if task.connectionState == .active {
+                ConnectionActiveIndicatorView(task: task)
+            } else {
+                ConnectionTransferInfoView(task: task)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
+    }
+}
+
+// MARK: - Connection Active Indicator View
+
+@available(iOS 15, visionOS 1.0, *)
+private struct ConnectionActiveIndicatorView: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle())
+                .scaleEffect(1.2)
+
+            // Show live traffic stats if available
+            HStack(spacing: 20) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.up")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(task.connectionUpload ?? "0 KB")
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.down")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(task.connectionDownload ?? "0 KB")
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(.top, 8)
     }
 }
 
@@ -424,7 +477,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .pending ? .systemOrange : .systemGreen
+        let color: UXColor = task.connectionState == .active ? .systemOrange : .systemGreen
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
@@ -581,12 +634,26 @@ enum ConnectionInspectorTab: String, Identifiable, CaseIterable, CustomStringCon
 @available(macOS 13, *)
 private struct ConnectionHeaderView: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var isPulsing = false
 
     var body: some View {
         VStack(spacing: 8) {
-            Image(systemName: task.connectionState.iconSystemName)
-                .font(.system(size: 32))
-                .foregroundColor(task.connectionState.tintColor)
+            if task.connectionState == .active {
+                // Animated icon for active connections
+                ZStack {
+                    Image(systemName: task.connectionState.iconSystemName)
+                        .font(.system(size: 32))
+                        .foregroundColor(task.connectionState.tintColor)
+                        .scaleEffect(isPulsing ? 1.1 : 1.0)
+                        .opacity(isPulsing ? 0.7 : 1.0)
+                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
+                        .onAppear { isPulsing = true }
+                }
+            } else {
+                Image(systemName: task.connectionState.iconSystemName)
+                    .font(.system(size: 32))
+                    .foregroundColor(task.connectionState.tintColor)
+            }
 
             Text(task.connectionState.title)
                 .font(.headline)
@@ -754,7 +821,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .pending ? .systemOrange : .systemGreen
+        let color: UXColor = task.connectionState == .active ? .systemOrange : .systemGreen
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
