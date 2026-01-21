@@ -162,7 +162,7 @@ private struct ConnectionActiveIndicatorView: View {
             // Calm connected icon with gentle animation
             Image(systemName: "link.circle.fill")
                 .font(.system(size: 36))
-                .foregroundColor(.blue)
+                .foregroundColor(.green)
                 .opacity(isAnimating ? 0.6 : 1.0)
                 .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
                 .onAppear { isAnimating = true }
@@ -454,7 +454,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .connected ? .systemBlue : .systemGreen
+        let color: UXColor = task.connectionState == .connected ? .systemGreen : .systemGray
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
@@ -611,7 +611,7 @@ private struct ConnectionSummaryTabView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "link.circle.fill")
                             .font(.title3)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.green)
                             .opacity(isAnimating ? 0.6 : 1.0)
                             .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
                             .onAppear { isAnimating = true }
@@ -978,7 +978,7 @@ private struct ConnectionTimingView: View {
         var rows: [TimingRowViewModel] = []
 
         // Connection duration bar
-        let color: UXColor = task.connectionState == .connected ? .systemBlue : .systemGreen
+        let color: UXColor = task.connectionState == .connected ? .systemGreen : .systemGray
         rows.append(TimingRowViewModel(
             title: "Connection",
             value: durationStr,
