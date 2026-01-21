@@ -9,7 +9,7 @@ import PulseUI
 struct Pulse_Demo_macOSApp: App {
     var body: some Scene {
         WindowGroup {
-            ConsoleView(store: .demo)
+            ConsoleView(store: .mock)
         }
         .windowStyle(.hiddenTitleBar)
         .windowToolbarStyle(.unified(showsTitle: false))
