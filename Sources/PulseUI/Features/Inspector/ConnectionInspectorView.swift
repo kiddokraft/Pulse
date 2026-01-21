@@ -16,9 +16,7 @@ import Combine
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
 
-    @State private var shareItems: ShareItems?
     @EnvironmentObject private var environment: ConsoleEnvironment
-    @Environment(\.store) private var store
 
     var body: some View {
         List {
@@ -31,7 +29,6 @@ struct ConnectionInspectorView: View {
             }
         }
         .inlineNavigationTitle(task.connectionDomain ?? task.host ?? "Connection")
-        .sheet(item: $shareItems, content: ShareView.init)
     }
 
     @ViewBuilder
@@ -69,15 +66,6 @@ struct ConnectionInspectorView: View {
     @ViewBuilder
     private var trailingNavigationBarItems: some View {
         PinButton(viewModel: PinButtonViewModel(task), isTextNeeded: false)
-        Menu(content: {
-            AttributedStringShareMenu(shareItems: $shareItems) {
-                TextRenderer(options: .sharing).make {
-                    $0.render(task, content: .sharing, store: store)
-                }
-            }
-        }, label: {
-            Image(systemName: "square.and.arrow.up")
-        })
     }
 }
 
@@ -306,45 +294,64 @@ import Combine
 @available(macOS 13, *)
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
-
-    @State private var shareItems: ShareItems?
+    @State var selectedTab: ConnectionInspectorTab = .summary
     @Environment(\.store) private var store
 
     var body: some View {
-        List {
-            contents
+        VStack(spacing: 0) {
+            toolbar
+            Divider()
+            selectedTabView
         }
     }
 
     @ViewBuilder
-    private var contents: some View {
-        // Header with connection state
-        Section {
-            ConnectionHeaderView(task: task)
+    private var toolbar: some View {
+        HStack {
+            InlineTabBar(items: ConnectionInspectorTab.allCases, selection: $selectedTab)
+            Spacer()
+            ButtonCloseDetailsView()
         }
+        .padding(.horizontal, 10)
+        .frame(height: 27, alignment: .center)
+    }
 
-        // Connection Status
-        Section("Status") {
-            ConnectionStatusView(task: task)
-        }
-
-        // Connection Details
-        Section("Connection") {
-            ConnectionDetailsView(task: task)
-        }
-
-        // Routing Information
-        Section("Routing") {
-            ConnectionRoutingView(task: task)
-        }
-
-        // Traffic Statistics
-        if task.connectionState == .closed {
-            Section("Traffic") {
-                ConnectionTrafficView(task: task)
+    @ViewBuilder
+    private var selectedTabView: some View {
+        switch selectedTab {
+        case .summary:
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionSummary(task, store: store) }))
+        case .details:
+            List {
+                Section("Connection") {
+                    ConnectionDetailsView(task: task)
+                }
+            }
+        case .routing:
+            List {
+                Section("Routing") {
+                    ConnectionRoutingView(task: task)
+                }
+            }
+        case .traffic:
+            List {
+                Section("Traffic") {
+                    ConnectionTrafficView(task: task)
+                }
             }
         }
     }
+}
+
+/// Tab options for connection inspector (no Request, Response, Headers, Metrics, cURL)
+enum ConnectionInspectorTab: String, Identifiable, CaseIterable, CustomStringConvertible {
+    case summary = "Summary"
+    case details = "Details"
+    case routing = "Routing"
+    case traffic = "Traffic"
+
+    var id: ConnectionInspectorTab { self }
+    var description: String { self.rawValue }
 }
 
 // MARK: - macOS Helper Views

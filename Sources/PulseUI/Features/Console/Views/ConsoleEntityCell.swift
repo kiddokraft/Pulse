@@ -98,22 +98,34 @@ private struct _ConsoleTaskCell: View {
             PinButton(viewModel: .init(task)).tint(.pink)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(action: {
+            // Only show share for regular network tasks, not connections
+            if !task.isConnection {
+                Button(action: {
 #if os(iOS) || os(visionOS)
-                shareItems = ShareService.share(task, as: .html, store: store)
+                    shareItems = ShareService.share(task, as: .html, store: store)
 #else
-                sharedTask = task
+                    sharedTask = task
 #endif
-            }) {
-                Label("Share", systemImage: "square.and.arrow.up.fill")
-            }.tint(.blue)
+                }) {
+                    Label("Share", systemImage: "square.and.arrow.up.fill")
+                }.tint(.blue)
+            }
         }
         .contextMenu {
+            // Use connection-specific context menu for connections
+            if task.isConnection {
 #if os(iOS) || os(visionOS)
-            ContextMenu.NetworkTaskContextMenuItems(task: task, sharedItems: $shareItems)
+                ContextMenu.ConnectionContextMenuItems(task: task, sharedItems: $shareItems)
 #else
-            ContextMenu.NetworkTaskContextMenuItems(task: task, sharedTask: $sharedTask)
+                ContextMenu.ConnectionContextMenuItems(task: task)
 #endif
+            } else {
+#if os(iOS) || os(visionOS)
+                ContextMenu.NetworkTaskContextMenuItems(task: task, sharedItems: $shareItems)
+#else
+                ContextMenu.NetworkTaskContextMenuItems(task: task, sharedTask: $sharedTask)
+#endif
+            }
         }
 #if os(iOS) || os(visionOS)
         .sheet(item: $shareItems, content: ShareView.init)

@@ -87,28 +87,28 @@ extension LoggerStore {
         request.httpMethod = connection.network.uppercased()  // TCP or UDP
 
         // Store connection metadata in request headers
-        request.setValue(connection.network, forHTTPHeaderField: "X-Network")
-        request.setValue("IPv\(connection.ipVersion)", forHTTPHeaderField: "X-IP-Version")
-        request.setValue(connection.source, forHTTPHeaderField: "X-Source")
-        request.setValue(connection.destination, forHTTPHeaderField: "X-Destination")
+        request.setValue(connection.network, forHTTPHeaderField: "Connection-Network")
+        request.setValue("IPv\(connection.ipVersion)", forHTTPHeaderField: "Connection-IP-Version")
+        request.setValue(connection.source, forHTTPHeaderField: "Connection-Source")
+        request.setValue(connection.destination, forHTTPHeaderField: "Connection-Destination")
         if !connection.domain.isEmpty {
-            request.setValue(connection.domain, forHTTPHeaderField: "X-Domain")
+            request.setValue(connection.domain, forHTTPHeaderField: "Connection-Domain")
         }
         if !connection.connectionProtocol.isEmpty {
-            request.setValue(connection.connectionProtocol, forHTTPHeaderField: "X-Protocol")
+            request.setValue(connection.connectionProtocol, forHTTPHeaderField: "Connection-Protocol")
         }
-        request.setValue(connection.inbound, forHTTPHeaderField: "X-Inbound")
-        request.setValue(connection.inboundType, forHTTPHeaderField: "X-Inbound-Type")
+        request.setValue(connection.inbound, forHTTPHeaderField: "Connection-Inbound")
+        request.setValue(connection.inboundType, forHTTPHeaderField: "Connection-Inbound-Type")
 
         // Create response with outbound/routing info in headers
         var responseHeaders: [String: String] = [:]
-        responseHeaders["X-Outbound"] = connection.outbound
-        responseHeaders["X-Outbound-Type"] = connection.outboundType
-        responseHeaders["X-Rule"] = connection.rule
-        responseHeaders["X-Upload"] = formatBytes(connection.uplinkTotal)
-        responseHeaders["X-Download"] = formatBytes(connection.downlinkTotal)
+        responseHeaders["Connection-Outbound"] = connection.outbound
+        responseHeaders["Connection-Outbound-Type"] = connection.outboundType
+        responseHeaders["Connection-Rule"] = connection.rule
+        responseHeaders["Connection-Upload"] = formatBytes(connection.uplinkTotal)
+        responseHeaders["Connection-Download"] = formatBytes(connection.downlinkTotal)
         if !connection.chain.isEmpty {
-            responseHeaders["X-Chain"] = connection.chain.joined(separator: " → ")
+            responseHeaders["Connection-Chain"] = connection.chain.joined(separator: " → ")
         }
 
         let response = HTTPURLResponse(

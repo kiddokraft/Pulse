@@ -200,6 +200,95 @@ final class TextRenderer {
         string.append((task.httpMethod ?? "GET") + " " + (task.url ?? "–") + "\n", urlAttributes)
     }
 
+    // MARK: - Connection Rendering
+
+    /// Renders a connection-specific summary for proxy/VPN connections (TCP/UDP).
+    func renderConnectionSummary(_ task: NetworkTaskEntity, store: LoggerStore) {
+        // Header with status
+        let statusTitle = task.connectionState == .closed ? "Closed" : "Active"
+        let statusColor = task.connectionState == .closed ? UXColor.systemGreen : UXColor.systemOrange
+        string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
+        string.append(spacer())
+
+        // Protocol and destination
+        let proto = task.httpMethod ?? "TCP"
+        string.append(render(proto + "\n", role: .body, weight: .semibold))
+        let destination = task.connectionDomain ?? task.connectionDestination ?? task.host ?? "–"
+        string.append(render(destination + "\n", role: .body2))
+        addSpacer()
+
+        // Connection details section
+        var connectionItems: [(String, String?)] = []
+        if let source = task.connectionSource {
+            connectionItems.append(("Source", source))
+        }
+        if let dest = task.connectionDestination {
+            connectionItems.append(("Destination", dest))
+        }
+        if let domain = task.connectionDomain, !domain.isEmpty {
+            connectionItems.append(("Domain", domain))
+        }
+        if let proto = task.connectionProtocol, !proto.isEmpty {
+            connectionItems.append(("Protocol", proto))
+        }
+        if let ipVersion = task.connectionIPVersion {
+            connectionItems.append(("IP Version", ipVersion))
+        }
+        if let inbound = task.connectionInbound {
+            let inboundValue = task.connectionInboundType.map { "\(inbound) (\($0))" } ?? inbound
+            connectionItems.append(("Inbound", inboundValue))
+        }
+
+        if !connectionItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Connection", color: .blue, items: connectionItems)
+            string.append(render(section))
+            addSpacer()
+        }
+
+        // Routing section
+        var routingItems: [(String, String?)] = []
+        if let rule = task.connectionRule, !rule.isEmpty {
+            routingItems.append(("Rule", rule))
+        }
+        if let outbound = task.connectionOutbound {
+            let outboundValue = task.connectionOutboundType.map { "\(outbound) (\($0))" } ?? outbound
+            routingItems.append(("Outbound", outboundValue))
+        }
+        if let chain = task.connectionChain, !chain.isEmpty {
+            routingItems.append(("Chain", chain))
+        }
+
+        if !routingItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Routing", color: .purple, items: routingItems)
+            string.append(render(section))
+            addSpacer()
+        }
+
+        // Traffic section (only for closed connections)
+        if task.connectionState == .closed {
+            var trafficItems: [(String, String?)] = []
+            if let upload = task.connectionUpload {
+                trafficItems.append(("Upload", upload))
+            }
+            if let download = task.connectionDownload {
+                trafficItems.append(("Download", download))
+            }
+            if task.duration > 0 {
+                trafficItems.append(("Duration", DurationFormatter.string(from: task.duration)))
+            }
+
+            if !trafficItems.isEmpty {
+                let section = KeyValueSectionViewModel(title: "Traffic", color: .green, items: trafficItems)
+                string.append(render(section))
+            }
+        }
+
+        // Remove trailing newline if present
+        if string.length > 0 {
+            string.deleteCharacters(in: NSRange(location: string.length - 1, length: 1))
+        }
+    }
+
     func render(_ transaction: NetworkTransactionMetricsEntity) {
         do {
             let status = StatusLabelViewModel(transaction: transaction)

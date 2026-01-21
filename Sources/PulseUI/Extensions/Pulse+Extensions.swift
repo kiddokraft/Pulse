@@ -109,72 +109,72 @@ extension NetworkTaskEntity {
 
     /// Network protocol (tcp/udp)
     var connectionNetwork: String? {
-        originalRequest?.headers["X-Network"]
+        originalRequest?.headers["Connection-Network"]
     }
 
     /// Source address
     var connectionSource: String? {
-        originalRequest?.headers["X-Source"]
+        originalRequest?.headers["Connection-Source"]
     }
 
     /// Destination address
     var connectionDestination: String? {
-        originalRequest?.headers["X-Destination"]
+        originalRequest?.headers["Connection-Destination"]
     }
 
     /// Domain name if available
     var connectionDomain: String? {
-        originalRequest?.headers["X-Domain"]
+        originalRequest?.headers["Connection-Domain"]
     }
 
     /// Application protocol
     var connectionProtocol: String? {
-        originalRequest?.headers["X-Protocol"]
+        originalRequest?.headers["Connection-Protocol"]
     }
 
     /// Inbound tag
     var connectionInbound: String? {
-        originalRequest?.headers["X-Inbound"]
+        originalRequest?.headers["Connection-Inbound"]
     }
 
     /// Inbound type
     var connectionInboundType: String? {
-        originalRequest?.headers["X-Inbound-Type"]
+        originalRequest?.headers["Connection-Inbound-Type"]
     }
 
     /// IP version
     var connectionIPVersion: String? {
-        originalRequest?.headers["X-IP-Version"]
+        originalRequest?.headers["Connection-IP-Version"]
     }
 
     /// Outbound tag
     var connectionOutbound: String? {
-        response?.headers["X-Outbound"]
+        response?.headers["Connection-Outbound"]
     }
 
     /// Outbound type
     var connectionOutboundType: String? {
-        response?.headers["X-Outbound-Type"]
+        response?.headers["Connection-Outbound-Type"]
     }
 
     /// Matched rule
     var connectionRule: String? {
-        response?.headers["X-Rule"]
+        response?.headers["Connection-Rule"]
     }
 
     /// Upload traffic
     var connectionUpload: String? {
-        response?.headers["X-Upload"]
+        response?.headers["Connection-Upload"]
     }
 
     /// Download traffic
     var connectionDownload: String? {
-        response?.headers["X-Download"]
+        response?.headers["Connection-Download"]
     }
 
     /// Proxy chain
     var connectionChain: String? {
-        response?.headers["X-Chain"]
+        response?.headers["Connection-Chain"]
     }
 }
 
