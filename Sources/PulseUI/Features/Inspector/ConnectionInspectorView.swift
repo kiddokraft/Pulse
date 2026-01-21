@@ -39,9 +39,12 @@ struct ConnectionInspectorView: View {
         // Header with connection state
         Section {
             ConnectionHeaderView(task: task)
+            ConnectionTimingView(task: task)
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowBackground(Color.clear)
+        
+      
 
         // Connection Status
         Section {
@@ -66,11 +69,11 @@ struct ConnectionInspectorView: View {
         }
 
         // Timing
-        if task.effectiveDuration > 0 {
-            Section("Timing") {
-                ConnectionTimingView(task: task)
-            }
-        }
+//        if task.effectiveDuration > 0 {
+//            Section("Timing") {
+//               
+//            }
+//        }
     }
 
     @ViewBuilder
