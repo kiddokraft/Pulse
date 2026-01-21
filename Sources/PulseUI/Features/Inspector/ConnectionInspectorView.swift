@@ -473,49 +473,161 @@ import CoreData
 import Pulse
 import Combine
 
+enum ConnectionInspectorTab: String, Identifiable, CaseIterable, CustomStringConvertible {
+    case summary = "Summary"
+    case timing = "Timing"
+
+    var id: ConnectionInspectorTab { self }
+    var description: String { self.rawValue }
+}
+
 @available(macOS 13, *)
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var selectedTab: ConnectionInspectorTab = .summary
     @Environment(\.store) private var store
 
     var body: some View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            RichTextView(viewModel: makeViewModel())
+            selectedTabView
         }
     }
 
-    private func makeViewModel() -> RichTextViewModel {
-        let renderer = TextRenderer(options: .sharing)
-        renderer.renderConnectionFull(task, store: store)
-
-        // Add timing section
-        if task.effectiveDuration > 0 {
-            renderer.addSpacer()
-            var timingItems: [(String, String?)] = []
-            timingItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
-
-            // Transfer rate
-            if let upload = task.connectionUpload, let download = task.connectionDownload {
-                let uploadBytes = parseBytes(upload)
-                let downloadBytes = parseBytes(download)
-                let totalBytes = uploadBytes + downloadBytes
-                if totalBytes > 0 && task.effectiveDuration > 0 {
-                    let rate = ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary)
-                    timingItems.append(("Transfer Rate", rate + "/s"))
-                }
-            }
-
-            if !timingItems.isEmpty {
-                let section = KeyValueSectionViewModel(title: "Timing", color: .orange, items: timingItems)
-                renderer.render(section)
+    @ViewBuilder
+    private var selectedTabView: some View {
+        switch selectedTab {
+        case .summary:
+            RichTextView(viewModel: makeSummaryViewModel())
+        case .timing:
+            if task.effectiveDuration > 0 {
+                ConnectionTimingViewMac(task: task)
+            } else {
+                PlaceholderView(imageName: "clock", title: "No Timing Data")
             }
         }
+    }
 
+    private func makeSummaryViewModel() -> RichTextViewModel {
+        let renderer = TextRenderer(options: .sharing)
+        renderer.renderConnectionFull(task, store: store)
         let viewModel = RichTextViewModel(string: renderer.make())
         viewModel.isFilterEnabled = true
         return viewModel
+    }
+
+    @ViewBuilder
+    private var toolbar: some View {
+        HStack {
+            InlineTabBar(items: ConnectionInspectorTab.allCases, selection: $selectedTab)
+            Spacer()
+            ButtonCloseDetailsView()
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 27, alignment: .center)
+    }
+}
+
+// MARK: - macOS Timing View
+
+@available(macOS 13, *)
+private struct ConnectionTimingViewMac: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Timing info text
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Duration")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(DurationFormatter.string(from: task.effectiveDuration))
+                }
+
+                if let upload = task.connectionUpload, let download = task.connectionDownload {
+                    let uploadBytes = parseBytes(upload)
+                    let downloadBytes = parseBytes(download)
+                    let totalBytes = uploadBytes + downloadBytes
+                    if totalBytes > 0 && task.effectiveDuration > 0 {
+                        let rate = ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary)
+                        HStack {
+                            Text("Transfer Rate")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(rate + "/s")
+                        }
+                    }
+                }
+            }
+            .font(.system(.body, design: .monospaced))
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
+
+            // Timing graph
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Timeline")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+
+                TimingView(viewModel: makeTimingViewModel())
+                    .frame(minHeight: 100)
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+
+    private func makeTimingViewModel() -> TimingViewModel {
+        let duration = task.effectiveDuration
+        let durationStr = DurationFormatter.string(from: duration)
+
+        var rows: [TimingRowViewModel] = []
+
+        // Connection duration bar
+        let color: UXColor = task.connectionState == .connected ? .systemOrange : .systemGreen
+        rows.append(TimingRowViewModel(
+            title: "Connection",
+            value: durationStr,
+            color: color,
+            start: 0.0,
+            length: 1.0
+        ))
+
+        // Add upload/download visualization if we have data
+        if task.connectionState == .complete,
+           let upload = task.connectionUpload,
+           let download = task.connectionDownload {
+            let uploadBytes = parseBytes(upload)
+            let downloadBytes = parseBytes(download)
+            let totalBytes = uploadBytes + downloadBytes
+
+            if totalBytes > 0 {
+                let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
+
+                rows.append(TimingRowViewModel(
+                    title: "Upload",
+                    value: upload,
+                    color: .systemBlue,
+                    start: 0.0,
+                    length: uploadRatio
+                ))
+
+                rows.append(TimingRowViewModel(
+                    title: "Download",
+                    value: download,
+                    color: .systemPurple,
+                    start: uploadRatio,
+                    length: 1.0 - uploadRatio
+                ))
+            }
+        }
+
+        let section = TimingRowSectionViewModel(title: "Timeline", items: rows)
+        return TimingViewModel(sections: [section])
     }
 
     private func parseBytes(_ string: String) -> Int64 {
@@ -534,19 +646,6 @@ struct ConnectionInspectorView: View {
         default: multiplier = 1
         }
         return Int64(value * Double(multiplier))
-    }
-
-    @ViewBuilder
-    private var toolbar: some View {
-        HStack {
-            Text(task.connectionDomain ?? task.host ?? "Connection")
-                .font(.headline)
-                .lineLimit(1)
-            Spacer()
-            ButtonCloseDetailsView()
-        }
-        .padding(.horizontal, 10)
-        .frame(height: 27, alignment: .center)
     }
 }
 
