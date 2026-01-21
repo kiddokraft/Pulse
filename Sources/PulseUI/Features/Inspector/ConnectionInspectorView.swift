@@ -22,12 +22,12 @@ struct ConnectionInspectorView: View {
 
     var body: some View {
         VStack(spacing: 0){
-//            VStack(spacing: 0){
-                
-//            }
-//            Divider()
+          
+            
             List {
-                ConnectionTimingView(task: task)
+           
+                    ConnectionTimingView(task: task)
+                
                 contents
             }
             .listStyle(.inset)
@@ -50,9 +50,10 @@ struct ConnectionInspectorView: View {
 //        }
 //        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
 //        .listRowBackground(Color.clear)
-//        
-//    
-
+        
+    
+//            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+//            .listRowBackground(Color.clear)
 
         // Connection Status
         Section {
