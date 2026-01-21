@@ -275,6 +275,7 @@
 		0CFF79E229EC1FA200BE767B /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CFF79E029EC1F7800BE767B /* ImageProcessor.swift */; };
 		25E740012BE0FA58008C6DC3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 25E740002BE0FA58008C6DC3 /* PrivacyInfo.xcprivacy */; };
 		25E740072BE10B4C008C6DC3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 25E740062BE10B4C008C6DC3 /* PrivacyInfo.xcprivacy */; };
+		32577C922F20D76300632030 /* ConnectionInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32577C912F20D76300632030 /* ConnectionInspectorView.swift */; };
 		E95D6C562B7314E6004D28E4 /* HARDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D6C552B7314E6004D28E4 /* HARDocument.swift */; };
 /* End PBXBuildFile section */
 
@@ -735,6 +736,7 @@
 		25E740002BE0FA58008C6DC3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		25E740052BE10AC7008C6DC3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		25E740062BE10B4C008C6DC3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		32577C912F20D76300632030 /* ConnectionInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionInspectorView.swift; sourceTree = "<group>"; };
 		49E82A8526D107A00070244F /* AlamofireIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamofireIntegration.swift; sourceTree = "<group>"; };
 		49E82A8826D1083D0070244F /* MoyaIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoyaIntegration.swift; sourceTree = "<group>"; };
 		E95D6C552B7314E6004D28E4 /* HARDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HARDocument.swift; sourceTree = "<group>"; };
@@ -1350,6 +1352,7 @@
 				0CF0D5F6296F189600EED9D4 /* NetworkInspectorView-macos.swift */,
 				0CF0D5EE296F189500EED9D4 /* NetworkInspectorView-watchos.swift */,
 				0CF0D5F0296F189600EED9D4 /* NetworkInspectorResponseBodyView.swift */,
+				32577C912F20D76300632030 /* ConnectionInspectorView.swift */,
 				0CF0D5F1296F189600EED9D4 /* NetworkInspectorRequestBodyView.swift */,
 				0CF0D5F2296F189600EED9D4 /* NetworkDetailsView.swift */,
 				0CF0D5F3296F189600EED9D4 /* NetworkInspectorView-shared.swift */,
@@ -2060,6 +2063,7 @@
 				0CB63A132973A12300525165 /* ConsoleSearchListContentView.swift in Sources */,
 				0CB63A2C2975C40100525165 /* ConsoleSearchFilter.swift in Sources */,
 				0CB63A25297592D400525165 /* Parser.swift in Sources */,
+				32577C922F20D76300632030 /* ConnectionInspectorView.swift in Sources */,
 				0CB63A2729759D2E00525165 /* ConsoleSearchToken.swift in Sources */,
 				0CF0D679296F189600EED9D4 /* ConsoleView-ios.swift in Sources */,
 				0CF0D661296F189600EED9D4 /* NetworkInspectorTransferInfoView.swift in Sources */,

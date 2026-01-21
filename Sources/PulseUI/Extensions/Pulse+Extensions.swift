@@ -63,6 +63,119 @@ extension NetworkTaskEntity {
         }
         return state
     }
+
+    // MARK: - Connection Properties
+
+    /// Returns true if this task represents a proxy/VPN connection (TCP/UDP) rather than an HTTP request.
+    var isConnection: Bool {
+        let method = httpMethod?.uppercased() ?? ""
+        return method == "TCP" || method == "UDP"
+    }
+
+    /// Returns the connection state: Active (status 102) or Closed (status 200).
+    var connectionState: ConnectionState {
+        // Status 102 = Processing (active), 200 = OK (closed)
+        statusCode == 200 ? .closed : .active
+    }
+
+    /// Connection state for proxy/VPN connections.
+    enum ConnectionState {
+        case active
+        case closed
+
+        var title: String {
+            switch self {
+            case .active: return "Active"
+            case .closed: return "Closed"
+            }
+        }
+
+        var tintColor: Color {
+            switch self {
+            case .active: return .orange
+            case .closed: return .green
+            }
+        }
+
+        var iconSystemName: String {
+            switch self {
+            case .active: return "bolt.circle.fill"
+            case .closed: return "checkmark.circle.fill"
+            }
+        }
+    }
+
+    // MARK: - Connection Metadata from Headers
+
+    /// Network protocol (tcp/udp)
+    var connectionNetwork: String? {
+        originalRequest?.headers["X-Network"]
+    }
+
+    /// Source address
+    var connectionSource: String? {
+        originalRequest?.headers["X-Source"]
+    }
+
+    /// Destination address
+    var connectionDestination: String? {
+        originalRequest?.headers["X-Destination"]
+    }
+
+    /// Domain name if available
+    var connectionDomain: String? {
+        originalRequest?.headers["X-Domain"]
+    }
+
+    /// Application protocol
+    var connectionProtocol: String? {
+        originalRequest?.headers["X-Protocol"]
+    }
+
+    /// Inbound tag
+    var connectionInbound: String? {
+        originalRequest?.headers["X-Inbound"]
+    }
+
+    /// Inbound type
+    var connectionInboundType: String? {
+        originalRequest?.headers["X-Inbound-Type"]
+    }
+
+    /// IP version
+    var connectionIPVersion: String? {
+        originalRequest?.headers["X-IP-Version"]
+    }
+
+    /// Outbound tag
+    var connectionOutbound: String? {
+        response?.headers["X-Outbound"]
+    }
+
+    /// Outbound type
+    var connectionOutboundType: String? {
+        response?.headers["X-Outbound-Type"]
+    }
+
+    /// Matched rule
+    var connectionRule: String? {
+        response?.headers["X-Rule"]
+    }
+
+    /// Upload traffic
+    var connectionUpload: String? {
+        response?.headers["X-Upload"]
+    }
+
+    /// Download traffic
+    var connectionDownload: String? {
+        response?.headers["X-Download"]
+    }
+
+    /// Proxy chain
+    var connectionChain: String? {
+        response?.headers["X-Chain"]
+    }
 }
 
 extension LoggerMessageEntity {

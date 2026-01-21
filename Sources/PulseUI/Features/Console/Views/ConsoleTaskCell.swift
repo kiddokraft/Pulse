@@ -53,11 +53,15 @@ struct ConsoleTaskCell: View {
                 MockBadgeView()
                     .padding(.trailing, 2)
             }
-            StatusLabelViewModel(task: task, store: store).text
-                .font(ConsoleConstants.fontTitle)
-                .fontWeight(.medium)
-                .foregroundColor(task.state.tintColor)
-                .lineLimit(1)
+            if task.isConnection {
+                connectionStatusLabel
+            } else {
+                StatusLabelViewModel(task: task, store: store).text
+                    .font(ConsoleConstants.fontTitle)
+                    .fontWeight(.medium)
+                    .foregroundColor(task.state.tintColor)
+                    .lineLimit(1)
+            }
 #if os(macOS)
             details
 #endif
@@ -122,6 +126,9 @@ struct ConsoleTaskCell: View {
     }
 
     private var infoText: Text {
+        if task.isConnection {
+            return connectionInfoText
+        }
         var text = Text(task.httpMethod ?? "GET")
         if task.state != .pending {
             text = text + Text("    ") +
@@ -130,6 +137,36 @@ struct ConsoleTaskCell: View {
             makeInfoText("clock", ConsoleFormatter.duration(for: task) ?? "–")
         }
         return text
+    }
+
+    private var connectionInfoText: Text {
+        var text = Text(task.httpMethod ?? "TCP")
+        if task.connectionState == .closed {
+            let upload = task.connectionUpload ?? "0 KB"
+            let download = task.connectionDownload ?? "0 KB"
+            text = text + Text("    ") +
+            makeInfoText("arrow.up", upload) + Text("    ") +
+            makeInfoText("arrow.down", download)
+            if task.duration > 0 {
+                text = text + Text("     ") +
+                makeInfoText("clock", ConsoleFormatter.duration(for: task) ?? "–")
+            }
+        }
+        return text
+    }
+
+    @ViewBuilder
+    private var connectionStatusLabel: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(task.connectionState.tintColor)
+                .frame(width: 8, height: 8)
+            Text(task.connectionState.title)
+                .font(ConsoleConstants.fontTitle)
+                .fontWeight(.medium)
+                .foregroundColor(task.connectionState.tintColor)
+                .lineLimit(1)
+        }
     }
 
     private func makeInfoText(_ image: String, _ text: String) -> Text {

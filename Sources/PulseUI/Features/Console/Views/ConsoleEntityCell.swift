@@ -125,9 +125,16 @@ private struct _ConsoleTaskCell: View {
 #endif
     }
 
+    @ViewBuilder
     private var inspector: some View {
         // We don't own NavigationView, so we have to inject the dependencies
-        NetworkInspectorView(task: task)
-            .injecting(environment)
+        // Route to ConnectionInspectorView for TCP/UDP connections
+        if task.isConnection {
+            ConnectionInspectorView(task: task)
+                .injecting(environment)
+        } else {
+            NetworkInspectorView(task: task)
+                .injecting(environment)
+        }
     }
 }

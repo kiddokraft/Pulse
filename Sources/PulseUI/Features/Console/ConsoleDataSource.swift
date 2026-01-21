@@ -183,16 +183,24 @@ private func _makePredicate(_ mode: ConsoleMode, _ filters: ConsoleFilers, _ isO
         return predicates.isEmpty ? nil : NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
 
+    // Connection tasks use TCP/UDP as httpMethod, regular network tasks use HTTP methods
+    let connectionMethods = ["TCP", "UDP"]
+
     switch mode {
     case .all:
         return makeMessagesPredicate(isMessageOnly: false)
     case .logs:
         return makeMessagesPredicate(isMessageOnly: true)
     case .network:
-        return ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
+        // Exclude connection tasks (TCP/UDP) from network view
+        let networkPredicate = ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
+        let notConnectionPredicate = NSPredicate(format: "NOT (httpMethod IN %@)", connectionMethods)
+        if let networkPredicate = networkPredicate {
+            return NSCompoundPredicate(andPredicateWithSubpredicates: [networkPredicate, notConnectionPredicate])
+        }
+        return notConnectionPredicate
     case .connection:
         // Only show connection tasks (TCP/UDP)
-        let connectionMethods = ["TCP", "UDP"]
         let networkPredicate = ConsoleFilers.makeNetworkPredicates(criteria: filters, isOnlyErrors: isOnlyErrors)
         let connectionPredicate = NSPredicate(format: "httpMethod IN %@", connectionMethods)
         if let networkPredicate = networkPredicate {
