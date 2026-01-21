@@ -37,14 +37,16 @@ struct ConnectionInspectorView: View {
     @ViewBuilder
     private var contents: some View {
         // Header with connection state
-        Section {
-            ConnectionHeaderView(task: task)
-            ConnectionTimingView(task: task)
-        }
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .listRowBackground(Color.clear)
+//        Section {
+//            ConnectionHeaderView(task: task)
+//          
+//        }
+//        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+//        .listRowBackground(Color.clear)
         
-      
+        ConnectionTimingView(task: task)
+//            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowBackground(Color.clear)
 
         // Connection Status
         Section {
@@ -100,8 +102,9 @@ private struct ConnectionHeaderView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            // Status with indicator
             HStack(spacing: 8) {
+            // Status with indicator
+           
                 if task.connectionState == .connected {
                     Circle()
                         .fill(task.connectionState.tintColor)
@@ -115,7 +118,7 @@ private struct ConnectionHeaderView: View {
                         .frame(width: 10, height: 10)
                 }
                 Text(task.connectionState.title)
-                    .font(.headline)
+                .font(.headline)
                     .foregroundColor(task.connectionState.tintColor)
 
                 Text("•")
@@ -130,6 +133,15 @@ private struct ConnectionHeaderView: View {
                     Text(ipVersion)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                }
+                
+                if let connectionProtocol = task.connectionProtocol {
+                    Text("•")
+                        .foregroundColor(.secondary)
+                    Text(connectionProtocol)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
                 }
             }
 
@@ -327,51 +339,51 @@ private struct ConnectionTimingView: View {
     var body: some View {
         VStack(spacing: 16) {
             // Use TimingView for the timeline chart
-            if task.effectiveDuration > 0 {
+//            if task.effectiveDuration > 0 {
                 TimingView(viewModel: makeTimingViewModel())
-            }
+//            }
 
             // Additional timing info
-            VStack(spacing: 8) {
-                if let start = task.createdAt as Date? {
-                    HStack {
-                        Text("Started")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(start, style: .time)
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                if task.connectionState == .complete, task.effectiveDuration > 0 {
-                    HStack {
-                        Text("Duration")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(DurationFormatter.string(from: task.effectiveDuration))
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-
-                    // Transfer rate
-                    if let upload = task.connectionUpload, let download = task.connectionDownload {
-                        let uploadBytes = parseBytes(upload)
-                        let downloadBytes = parseBytes(download)
-                        let totalBytes = uploadBytes + downloadBytes
-                        if totalBytes > 0 {
-                            HStack {
-                                Text("Transfer Rate")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary) + "/s")
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                }
-            }
+//            VStack(spacing: 8) {
+//                if let start = task.createdAt as Date? {
+//                    HStack {
+//                        Text("Started")
+//                            .foregroundColor(.secondary)
+//                        Spacer()
+//                        Text(start, style: .time)
+//                            .font(.system(.body, design: .monospaced))
+//                            .foregroundColor(.secondary)
+//                    }
+//                }
+//
+//                if task.connectionState == .complete, task.effectiveDuration > 0 {
+//                    HStack {
+//                        Text("Duration")
+//                            .foregroundColor(.secondary)
+//                        Spacer()
+//                        Text(DurationFormatter.string(from: task.effectiveDuration))
+//                            .font(.system(.body, design: .monospaced))
+//                            .foregroundColor(.secondary)
+//                    }
+//
+//                    // Transfer rate
+//                    if let upload = task.connectionUpload, let download = task.connectionDownload {
+//                        let uploadBytes = parseBytes(upload)
+//                        let downloadBytes = parseBytes(download)
+//                        let totalBytes = uploadBytes + downloadBytes
+//                        if totalBytes > 0 {
+//                            HStack {
+//                                Text("Transfer Rate")
+//                                    .foregroundColor(.secondary)
+//                                Spacer()
+//                                Text(ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary) + "/s")
+//                                    .font(.system(.body, design: .monospaced))
+//                                    .foregroundColor(.secondary)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
