@@ -482,21 +482,7 @@ struct ConnectionInspectorView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Text content
-                    RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionFull(task, store: store) }))
-
-                    // Timing graph (like iOS)
-                    if task.effectiveDuration > 0 {
-                        Divider()
-                            .padding(.vertical, 8)
-                        ConnectionTimingViewMac(task: task)
-                            .padding(.horizontal, 12)
-                            .padding(.bottom, 12)
-                    }
-                }
-            }
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionFull(task, store: store) }))
         }
     }
 
@@ -511,91 +497,6 @@ struct ConnectionInspectorView: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 27, alignment: .center)
-    }
-}
-
-// MARK: - macOS Timing View
-
-@available(macOS 13, *)
-private struct ConnectionTimingViewMac: View {
-    @ObservedObject var task: NetworkTaskEntity
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Timing")
-                .font(.headline)
-                .foregroundColor(.secondary)
-
-            TimingView(viewModel: makeTimingViewModel())
-        }
-        .frame(height: 120)
-    }
-
-    private func makeTimingViewModel() -> TimingViewModel {
-        let duration = task.effectiveDuration
-        let durationStr = DurationFormatter.string(from: duration)
-
-        var rows: [TimingRowViewModel] = []
-
-        // Connection duration bar
-        let color: UXColor = task.connectionState == .connected ? .systemOrange : .systemGreen
-        rows.append(TimingRowViewModel(
-            title: "Connection",
-            value: durationStr,
-            color: color,
-            start: 0.0,
-            length: 1.0
-        ))
-
-        // Add upload/download visualization if we have data
-        if task.connectionState == .complete,
-           let upload = task.connectionUpload,
-           let download = task.connectionDownload {
-            let uploadBytes = parseBytes(upload)
-            let downloadBytes = parseBytes(download)
-            let totalBytes = uploadBytes + downloadBytes
-
-            if totalBytes > 0 {
-                let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
-
-                rows.append(TimingRowViewModel(
-                    title: "Upload",
-                    value: upload,
-                    color: .systemBlue,
-                    start: 0.0,
-                    length: uploadRatio
-                ))
-
-                rows.append(TimingRowViewModel(
-                    title: "Download",
-                    value: download,
-                    color: .systemPurple,
-                    start: uploadRatio,
-                    length: 1.0 - uploadRatio
-                ))
-            }
-        }
-
-        let section = TimingRowSectionViewModel(title: "Timeline", items: rows)
-        return TimingViewModel(sections: [section])
-    }
-
-    private func parseBytes(_ string: String) -> Int64 {
-        let components = string.components(separatedBy: " ")
-        guard components.count >= 2,
-              let value = Double(components[0]) else {
-            return 0
-        }
-        let unit = components[1].uppercased()
-        let multiplier: Int64
-        switch unit {
-        case "B", "BYTES": multiplier = 1
-        case "KB": multiplier = 1024
-        case "MB": multiplier = 1024 * 1024
-        case "GB": multiplier = 1024 * 1024 * 1024
-        default: multiplier = 1
-        }
-        return Int64(value * Double(multiplier))
     }
 }
 

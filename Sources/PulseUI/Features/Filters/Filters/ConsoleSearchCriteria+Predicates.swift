@@ -98,17 +98,19 @@ private func makePredicates(for criteria: ConsoleFilers.Network) -> [NSPredicate
 
     // Connection state filter (for .connection mode)
     // statusCode 102 = active, 200 = complete
-    if criteria.connectionState.isEnabled {
-        var statusCodes: [Int16] = []
-        if criteria.connectionState.showActive {
-            statusCodes.append(102)
+    // Only apply filter when one option is deselected (not both selected = show all)
+    let showActive = criteria.connectionState.showActive
+    let showComplete = criteria.connectionState.showComplete
+    if showActive != showComplete {
+        // Only one is selected, apply filter
+        if showActive {
+            predicates.append(NSPredicate(format: "statusCode == %d", 102))
+        } else if showComplete {
+            predicates.append(NSPredicate(format: "statusCode == %d", 200))
         }
-        if criteria.connectionState.showComplete {
-            statusCodes.append(200)
-        }
-        if !statusCodes.isEmpty && statusCodes.count < 2 {
-            predicates.append(NSPredicate(format: "statusCode IN %@", statusCodes))
-        }
+    } else if !showActive && !showComplete {
+        // Both deselected - show nothing (impossible filter)
+        predicates.append(NSPredicate(value: false))
     }
 
 #if PULSE_STANDALONE_APP

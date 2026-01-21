@@ -121,9 +121,9 @@ struct ConsoleModePicker: View {
             ConsoleModeButton(title: "Connection", details: CountFormatter.string(from: connectionCounter.count), isSelected: environment.mode == .connection) {
                 environment.mode = .connection
             }
-            ConsoleModeButton(title: "Network", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .network) {
-                environment.mode = .network
-            }
+//            ConsoleModeButton(title: "Network", details: CountFormatter.string(from: tasksCounter.count), isSelected: environment.mode == .network) {
+//                environment.mode = .network
+//            }
             ConsoleModeButton(title: "Logs", details: CountFormatter.string(from: logsCounter.count), isSelected: environment.mode == .logs) {
                 environment.mode = .logs
             }
@@ -217,7 +217,9 @@ struct ConsoleListOptionsView: View {
 #if os(macOS)
     private var sortOrderButton: some View {
         Button(action: {
-            environment.listOptions.order = environment.listOptions.order == .ascending ? .descending : .ascending
+            var newOptions = environment.listOptions
+            newOptions.order = newOptions.order == .ascending ? .descending : .ascending
+            environment.listOptions = newOptions
         }) {
             Image(systemName: environment.listOptions.order == .ascending ? "arrow.up" : "arrow.down")
         }
