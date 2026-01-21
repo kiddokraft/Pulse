@@ -45,43 +45,57 @@ struct ConsoleMessageDetailsView: View {
         contents
     }
 #elseif os(macOS)
-    @State private var selectedTab: ConsoleMessageTab = .message
-
     var body: some View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            selectedTabView
+            // Combined message and metadata in single text view
+            RichTextView(viewModel: makeFullTextViewModel())
         }
     }
 
     private var toolbar: some View {
         HStack {
-            InlineTabBar(items: ConsoleMessageTab.allCases, selection: $selectedTab)
+            Text("Log Details")
+                .font(.headline)
+                .lineLimit(1)
             Spacer()
             ButtonCloseDetailsView()
         }
         .padding(.horizontal, 10)
-//        .offset(y: -2)
         .frame(height: 27, alignment: .center)
     }
 
-    @ViewBuilder
-    private var selectedTabView: some View {
-        switch selectedTab {
-        case .message:
-            RichTextView(viewModel: makeTextViewModel())
-        case .metadata:
-            ConsoleMessageMetadataView(message: message)
-        }
-    }
+    private func makeFullTextViewModel() -> RichTextViewModel {
+        // Create combined string: message text + metadata
+        let combined = NSMutableAttributedString()
 
-    private enum ConsoleMessageTab: String, Identifiable, CaseIterable, CustomStringConvertible {
-        case message = "Messages"
-        case metadata = "Metadata"
+        // Message text
+        let messageRenderer = TextRenderer()
+        combined.append(messageRenderer.preformatted(message.text))
+        combined.append(NSAttributedString(string: "\n\n"))
 
-        var id: ConsoleMessageTab { self }
-        var description: String { self.rawValue }
+        // Metadata sections
+        let metadataRenderer = TextRenderer()
+        let sections = [
+            KeyValueSectionViewModel(title: "Summary", color: .textColor(for: message.logLevel), items: [
+                ("Date", DateFormatter.fullDateFormatter.string(from: message.createdAt)),
+                ("Level", LoggerStore.Level(rawValue: message.level)?.name),
+                ("Label", message.label.isEmpty ? nil : message.label)
+            ]),
+            KeyValueSectionViewModel(title: "Details", color: .primary, items: [
+                ("File", message.file.isEmpty ? nil : message.file),
+                ("Function", message.function.isEmpty ? nil : message.function),
+                ("Line", message.line == 0 ? nil : "\(message.line)"),
+            ]),
+            KeyValueSectionViewModel(title: "Metadata", color: .indigo, items: message.metadata.sorted(by: { $0.key < $1.key }).map { ($0.key, $0.value )})
+        ]
+        metadataRenderer.render(sections)
+        combined.append(metadataRenderer.make())
+
+        let viewModel = RichTextViewModel(string: combined)
+        viewModel.isFilterEnabled = true
+        return viewModel
     }
 #endif
 
