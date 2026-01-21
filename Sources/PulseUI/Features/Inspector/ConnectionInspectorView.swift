@@ -524,8 +524,8 @@ private struct ConnectionTimingViewMac: View {
                 .foregroundColor(.secondary)
 
             TimingView(viewModel: makeTimingViewModel())
-                .frame(height: 80)
-        }
+            
+        }    .frame(height: 80)
     }
 
     private func makeTimingViewModel() -> TimingViewModel {
