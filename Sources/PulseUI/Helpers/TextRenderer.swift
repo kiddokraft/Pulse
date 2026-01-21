@@ -360,54 +360,10 @@ final class TextRenderer {
         }
     }
 
-    /// Renders full connection view for macOS (summary + timing).
+    /// Renders full connection view for macOS (summary only, timing graph shown separately).
     func renderConnectionFull(_ task: NetworkTaskEntity, store: LoggerStore) {
         // Render the summary (includes status, details, routing, traffic)
         renderConnectionSummary(task, store: store)
-
-        // Add timing section at the end
-        if task.effectiveDuration > 0 {
-            addSpacer()
-            var timingItems: [(String, String?)] = []
-            if let time = task.createdAt as Date? {
-                timingItems.append(("Started", DateFormatter.localizedString(from: time, dateStyle: .none, timeStyle: .medium)))
-            }
-            timingItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
-
-            // Transfer rate
-            if let upload = task.connectionUpload, let download = task.connectionDownload {
-                let uploadBytes = parseConnectionBytes(upload)
-                let downloadBytes = parseConnectionBytes(download)
-                let totalBytes = uploadBytes + downloadBytes
-                if totalBytes > 0 && task.effectiveDuration > 0 {
-                    let rate = ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary)
-                    timingItems.append(("Transfer Rate", rate + "/s"))
-                }
-            }
-
-            if !timingItems.isEmpty {
-                let section = KeyValueSectionViewModel(title: "Timing", color: .orange, items: timingItems)
-                string.append(render(section))
-            }
-        }
-    }
-
-    private func parseConnectionBytes(_ string: String) -> Int64 {
-        let components = string.components(separatedBy: " ")
-        guard components.count >= 2,
-              let value = Double(components[0]) else {
-            return 0
-        }
-        let unit = components[1].uppercased()
-        let multiplier: Int64
-        switch unit {
-        case "B", "BYTES": multiplier = 1
-        case "KB": multiplier = 1024
-        case "MB": multiplier = 1024 * 1024
-        case "GB": multiplier = 1024 * 1024 * 1024
-        default: multiplier = 1
-        }
-        return Int64(value * Double(multiplier))
     }
 
     func render(_ transaction: NetworkTransactionMetricsEntity) {

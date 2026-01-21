@@ -137,8 +137,16 @@ extension ConsoleFiltersView {
         ConsoleSection(header: {
             ConsoleSectionHeader(icon: "link", title: "State", filter: $viewModel.criteria.network.connectionState)
         }, content: {
+#if os(macOS)
+            HStack {
+                Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive)
+                Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete)
+                Spacer()
+            }
+#else
             Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive)
             Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete)
+#endif
         })
     }
 }

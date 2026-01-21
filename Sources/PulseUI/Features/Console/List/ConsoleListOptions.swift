@@ -8,7 +8,11 @@ import Pulse
 struct ConsoleListOptions: Equatable {
     var messageSortBy: MessageSortBy = .dateCreated
     var taskSortBy: TaskSortBy = .dateCreated
+#if os(macOS)
+    var order: Ordering = .ascending
+#else
     var order: Ordering = .descending
+#endif
 
     var messageGroupBy: MessageGroupBy = .noGrouping
     var taskGroupBy: TaskGroupBy = .noGrouping
