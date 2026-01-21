@@ -33,7 +33,7 @@ struct ConsoleFiltersView: View {
                 
             }
             HStack {
-                Label(environment.mode == .network ? "Network Filters" : "Message Filters", systemImage: "line.3.horizontal.decrease")
+                Label(environment.mode == .network || environment.mode == .connection ? "Network Filters" : "Message Filters", systemImage: "line.3.horizontal.decrease")
              
                     .font(.headline)
                     .foregroundColor(.secondary)
@@ -54,7 +54,7 @@ struct ConsoleFiltersView: View {
 
         sessionsSection
 
-        if environment.mode == .network {
+        if environment.mode == .network || environment.mode == .connection {
 #if PULSE_STANDALONE_APP
             customNetworkFiltersSection
 #endif

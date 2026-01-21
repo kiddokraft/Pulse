@@ -470,23 +470,11 @@ struct ConnectionInspectorView: View {
         case .summary:
             RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionSummary(task, store: store) }))
         case .details:
-            List {
-                Section("Connection") {
-                    ConnectionDetailsView(task: task)
-                }
-            }
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionDetails(task) }))
         case .routing:
-            List {
-                Section("Routing") {
-                    ConnectionRoutingView(task: task)
-                }
-            }
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionRouting(task) }))
         case .traffic:
-            List {
-                Section("Traffic") {
-                    ConnectionTrafficView(task: task)
-                }
-            }
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.renderConnectionTraffic(task) }))
         case .timing:
             List {
                 Section("Timing") {

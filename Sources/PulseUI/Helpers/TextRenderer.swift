@@ -206,7 +206,7 @@ final class TextRenderer {
     func renderConnectionSummary(_ task: NetworkTaskEntity, store: LoggerStore) {
         // Header with status
         let statusTitle = task.connectionState == .closed ? "Closed" : "Active"
-        let statusColor = task.connectionState == .closed ? UXColor.systemGreen : UXColor.systemOrange
+        let statusColor = task.connectionState == .closed ? UXColor.systemGray : UXColor.systemGreen
         string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
         string.append(spacer())
 
@@ -286,6 +286,77 @@ final class TextRenderer {
         // Remove trailing newline if present
         if string.length > 0 {
             string.deleteCharacters(in: NSRange(location: string.length - 1, length: 1))
+        }
+    }
+
+    /// Renders connection details section for the Details tab.
+    func renderConnectionDetails(_ task: NetworkTaskEntity) {
+        var connectionItems: [(String, String?)] = []
+        if let source = task.connectionSource {
+            connectionItems.append(("Source", source))
+        }
+        if let dest = task.connectionDestination {
+            connectionItems.append(("Destination", dest))
+        }
+        if let domain = task.connectionDomain, !domain.isEmpty {
+            connectionItems.append(("Domain", domain))
+        }
+        if let proto = task.connectionProtocol, !proto.isEmpty {
+            connectionItems.append(("Protocol", proto))
+        }
+        if let ipVersion = task.connectionIPVersion {
+            connectionItems.append(("IP Version", ipVersion))
+        }
+        if let inbound = task.connectionInbound {
+            let inboundValue = task.connectionInboundType.map { "\(inbound) (\($0))" } ?? inbound
+            connectionItems.append(("Inbound", inboundValue))
+        }
+
+        if !connectionItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Connection", color: .blue, items: connectionItems)
+            string.append(render(section))
+        }
+    }
+
+    /// Renders routing section for the Routing tab.
+    func renderConnectionRouting(_ task: NetworkTaskEntity) {
+        var routingItems: [(String, String?)] = []
+        if let rule = task.connectionRule, !rule.isEmpty {
+            routingItems.append(("Rule", rule))
+        }
+        if let outbound = task.connectionOutbound {
+            let outboundValue = task.connectionOutboundType.map { "\(outbound) (\($0))" } ?? outbound
+            routingItems.append(("Outbound", outboundValue))
+        }
+        if let chain = task.connectionChain, !chain.isEmpty {
+            routingItems.append(("Chain", chain))
+        }
+
+        if !routingItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Routing", color: .purple, items: routingItems)
+            string.append(render(section))
+        }
+    }
+
+    /// Renders traffic section for the Traffic tab.
+    func renderConnectionTraffic(_ task: NetworkTaskEntity) {
+        var trafficItems: [(String, String?)] = []
+        if let upload = task.connectionUpload {
+            trafficItems.append(("Upload", upload))
+        }
+        if let download = task.connectionDownload {
+            trafficItems.append(("Download", download))
+        }
+        if task.duration > 0 {
+            trafficItems.append(("Duration", DurationFormatter.string(from: task.duration)))
+        }
+        if let time = task.createdAt as Date? {
+            trafficItems.append(("Started", DateFormatter.localizedString(from: time, dateStyle: .none, timeStyle: .medium)))
+        }
+
+        if !trafficItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Traffic", color: .green, items: trafficItems)
+            string.append(render(section))
         }
     }
 

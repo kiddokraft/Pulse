@@ -285,13 +285,13 @@ import Foundation
              DispatchQueue.main.async { [self] in
                  commandClient.rawConnections = message
                  commandClient.connections = filteredConnections
-                                                                                       
-                 // Store closed connections to Pulse
+
+                 // Store connections to Pulse (both active and closed)
                  for connection in allConnections {
-                     if connection.closedAt > 0 &&
-                        !commandClient.storedConnectionIds.contains(connection.id_) {
+                     let connectionKey = "\(connection.id_)_\(connection.closedAt > 0 ? "closed" : "active")"
+                     if !commandClient.storedConnectionIds.contains(connectionKey) {
                          LoggerStore.shared.storeConnection(connection)
-                         commandClient.storedConnectionIds.insert(connection.id_)
+                         commandClient.storedConnectionIds.insert(connectionKey)
                      }
                  }
              }
