@@ -36,7 +36,12 @@ struct ConsoleEntityDetailsRouterView: View {
             case .message(let message):
                 ConsoleMessageDetailsView(message: message)
             case .task(let task):
-                NetworkInspectorView(task: task)
+                // Route to ConnectionInspectorView for TCP/UDP connections
+                if task.isConnection {
+                    ConnectionInspectorView(task: task)
+                } else {
+                    NetworkInspectorView(task: task)
+                }
             }
         }
     }
@@ -57,6 +62,7 @@ struct ButtonCloseDetailsView: View {
     }
 }
 
+@available(macOS 13, *)
 struct ConsoleEntityStandaloneDetailsView: View {
     let entity: NSManagedObject
 
@@ -65,7 +71,12 @@ struct ConsoleEntityStandaloneDetailsView: View {
         case .message(let message):
             ConsoleMessageDetailsView(message: message)
         case .task(let task):
-            NetworkInspectorView(task: task)
+            // Route to ConnectionInspectorView for TCP/UDP connections
+            if task.isConnection {
+                ConnectionInspectorView(task: task)
+            } else {
+                NetworkInspectorView(task: task)
+            }
         }
     }
 }

@@ -64,6 +64,13 @@ struct ConnectionInspectorView: View {
                 ConnectionTrafficView(task: task)
             }
         }
+
+        // Timing
+        if task.duration > 0 {
+            Section("Timing") {
+                ConnectionTimingView(task: task)
+            }
+        }
     }
 
     @ViewBuilder
@@ -88,18 +95,18 @@ private struct ConnectionHeaderView: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
-        VStack(spacing: 12) {
-            // Connection state icon
-            Image(systemName: task.connectionState.iconSystemName)
-                .font(.system(size: 48))
-                .foregroundColor(task.connectionState.tintColor)
+        VStack(spacing: 16) {
+            // Connection state with icon
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(task.connectionState.tintColor)
+                    .frame(width: 12, height: 12)
+                Text(task.connectionState.title)
+                    .font(.headline)
+                    .foregroundColor(task.connectionState.tintColor)
+            }
 
-            // Connection state label
-            Text(task.connectionState.title)
-                .font(.headline)
-                .foregroundColor(task.connectionState.tintColor)
-
-            // Protocol badge
+            // Protocol badges
             HStack(spacing: 8) {
                 Text(task.httpMethod ?? "TCP")
                     .font(.caption.weight(.semibold))
@@ -119,9 +126,89 @@ private struct ConnectionHeaderView: View {
                         .cornerRadius(4)
                 }
             }
+
+            // Transfer info (similar to network metrics)
+            ConnectionTransferInfoView(task: task)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
+    }
+}
+
+// MARK: - Connection Transfer Info View
+
+@available(iOS 15, visionOS 1.0, *)
+private struct ConnectionTransferInfoView: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        HStack {
+            Spacer()
+
+            // Upload
+            VStack {
+                HStack(alignment: .center, spacing: 4) {
+                    Image(systemName: "arrow.up.circle")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Upload")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(task.connectionUpload ?? "0 KB")
+                            .font(.headline)
+                    }
+                }
+            }
+
+            Spacer()
+
+            Divider()
+                .frame(height: 40)
+
+            Spacer()
+
+            // Download
+            VStack {
+                HStack(alignment: .center, spacing: 4) {
+                    Image(systemName: "arrow.down.circle")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Download")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(task.connectionDownload ?? "0 KB")
+                            .font(.headline)
+                    }
+                }
+            }
+
+            Spacer()
+
+            Divider()
+                .frame(height: 40)
+
+            Spacer()
+
+            // Duration
+            VStack {
+                HStack(alignment: .center, spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Duration")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(task.duration > 0 ? DurationFormatter.string(from: task.duration) : "–")
+                            .font(.headline)
+                    }
+                }
+            }
+
+            Spacer()
+        }
     }
 }
 
@@ -273,6 +360,55 @@ private struct ConnectionTrafficView: View {
     }
 }
 
+// MARK: - Connection Timing View
+
+@available(iOS 15, visionOS 1.0, *)
+private struct ConnectionTimingView: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Duration bar
+            HStack(spacing: 12) {
+                Text("Duration")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .frame(width: 70, alignment: .leading)
+
+                GeometryReader { proxy in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(task.connectionState == .active ? Color.green : Color.gray)
+                        .frame(width: proxy.size.width)
+                }
+                .frame(height: 14)
+
+                Text(DurationFormatter.string(from: task.duration))
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .frame(width: 60, alignment: .trailing)
+            }
+
+            // Transfer rate if available
+            if task.connectionState == .closed, task.duration > 0 {
+                let totalBytes = (task.requestBodySize + task.responseBodySize)
+                if totalBytes > 0 {
+                    let rate = Double(totalBytes) / task.duration
+                    HStack {
+                        Text("Transfer Rate")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(ByteCountFormatter.string(fromByteCount: Int64(rate), countStyle: .binary) + "/s")
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 // MARK: - Helper Views
 
 @available(iOS 15, visionOS 1.0, *)
@@ -351,6 +487,12 @@ struct ConnectionInspectorView: View {
                     ConnectionTrafficView(task: task)
                 }
             }
+        case .timing:
+            List {
+                Section("Timing") {
+                    ConnectionTimingView(task: task)
+                }
+            }
         }
     }
 }
@@ -361,6 +503,7 @@ enum ConnectionInspectorTab: String, Identifiable, CaseIterable, CustomStringCon
     case details = "Details"
     case routing = "Routing"
     case traffic = "Traffic"
+    case timing = "Timing"
 
     var id: ConnectionInspectorTab { self }
     var description: String { self.rawValue }
@@ -501,6 +644,47 @@ private struct ConnectionTrafficView: View {
 
         if let download = task.connectionDownload {
             ConnectionRow(title: "Download", value: download)
+        }
+    }
+}
+
+@available(macOS 13, *)
+private struct ConnectionTimingView: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        if task.duration > 0 {
+            // Duration with visual bar
+            HStack(spacing: 12) {
+                Text("Duration")
+                    .frame(width: 80, alignment: .leading)
+
+                GeometryReader { proxy in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(task.connectionState == .active ? Color.green : Color.gray)
+                        .frame(width: proxy.size.width)
+                }
+                .frame(height: 12)
+
+                Text(DurationFormatter.string(from: task.duration))
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .frame(width: 70, alignment: .trailing)
+            }
+            .frame(height: 24)
+        }
+
+        if let time = task.createdAt as Date? {
+            ConnectionRow(title: "Started", value: DateFormatter.localizedString(from: time, dateStyle: .none, timeStyle: .medium))
+        }
+
+        // Transfer rate if available
+        if task.connectionState == .closed, task.duration > 0 {
+            let totalBytes = (task.requestBodySize + task.responseBodySize)
+            if totalBytes > 0 {
+                let rate = Double(totalBytes) / task.duration
+                ConnectionRow(title: "Transfer Rate", value: ByteCountFormatter.string(fromByteCount: Int64(rate), countStyle: .binary) + "/s")
+            }
         }
     }
 }
