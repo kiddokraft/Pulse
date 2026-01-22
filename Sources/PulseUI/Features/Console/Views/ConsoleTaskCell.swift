@@ -161,11 +161,11 @@ struct ConsoleTaskCell: View {
             Circle()
                 .fill(task.connectionState.tintColor)
                 .frame(width: 8, height: 8)
-            Text(task.connectionState.title)
-                .font(ConsoleConstants.fontTitle)
-                .fontWeight(.medium)
-                .foregroundColor(task.connectionState.tintColor)
-                .lineLimit(1)
+//            Text(task.connectionState.title)
+//                .font(ConsoleConstants.fontTitle)
+//                .fontWeight(.medium)
+//                .foregroundColor(task.connectionState.tintColor)
+//                .lineLimit(1)
         }
     }
 
