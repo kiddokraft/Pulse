@@ -57,6 +57,7 @@ final class ConsoleListViewModel: ConsoleDataSourceDelegate, ObservableObject, C
     private var dataSource: ConsoleDataSource?
     private var cancellables: [AnyCancellable] = []
     private var filtersCancellable: AnyCancellable?
+    private var isUpdateCoalescing = false
 
     init(environment: ConsoleEnvironment, filters: ConsoleFiltersViewModel) {
         self.store = environment.store
@@ -148,14 +149,20 @@ final class ConsoleListViewModel: ConsoleDataSourceDelegate, ObservableObject, C
     }
 
     func dataSource(_ dataSource: ConsoleDataSource, didUpdateWith diff: CollectionDifference<NSManagedObjectID>?) {
-        entities = dataSource.entities
-        sections = dataSource.sections
+        guard !isUpdateCoalescing else { return }
+        isUpdateCoalescing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            guard let self else { return }
+            self.isUpdateCoalescing = false
+            self.entities = dataSource.entities
+            self.sections = dataSource.sections
 #if os(iOS) || os(visionOS)
-        if scrollPosition == .nearTop {
-            refreshVisibleEntities()
-        }
+            if self.scrollPosition == .nearTop {
+                self.refreshVisibleEntities()
+            }
 #endif
-        events.send(.update(diff))
+            self.events.send(.update(nil))
+        }
     }
 
     // MARK: Visible Entities
