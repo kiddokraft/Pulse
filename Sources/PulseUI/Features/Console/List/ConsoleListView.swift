@@ -173,6 +173,8 @@ private struct _ConsoleListView: View {
                         ConsoleSearchResultsListContentView()
                     } else {
                         ConsoleListContentView(proxy: proxy)
+                            .drawingGroup()
+                            
                     }
                 }
             }
