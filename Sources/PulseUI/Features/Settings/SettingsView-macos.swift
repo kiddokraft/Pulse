@@ -40,6 +40,7 @@ struct SettingsView: View {
                 }
             }.padding()
         }.listStyle(.plain)
+            .drawingGroup()
     }
 }
 
