@@ -167,15 +167,15 @@ private struct _ConsoleListView: View {
                 ConsoleToolbarView()
             }
             Divider()
-//            ScrollViewReader { proxy in
+            ScrollViewReader { proxy in
                 List(selection: $selection) {
                     if isSearching && !searchViewModel.parameters.isEmpty {
                         ConsoleSearchResultsListContentView()
                     } else {
-                        ConsoleListContentView()
+                        ConsoleListContentView(proxy: proxy)
                     }
                 }
-//            }
+            }
             .environment(\.defaultMinListRowHeight, 1)
         }
     }

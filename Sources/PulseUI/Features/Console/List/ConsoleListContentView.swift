@@ -12,7 +12,7 @@ struct ConsoleListContentView: View {
     @EnvironmentObject var viewModel: ConsoleListViewModel
 
 #if os(macOS)
-//    let proxy: ScrollViewProxy
+    let proxy: ScrollViewProxy
 
     @SceneStorage("com-github-kean-pulse-is-now-enabled") private var isNowEnabled = true
 #endif
@@ -35,7 +35,7 @@ struct ConsoleListContentView: View {
         } else {
             plainView
 #if os(macOS)
-//                .apply(registerNowMode)
+                .apply(registerNowMode)
 #endif
         }
 #else
@@ -88,24 +88,24 @@ struct ConsoleListContentView: View {
     }
 
 #if os(macOS)
-//    private func registerNowMode<T: View>(for list: T) -> some View {
-//        list.onChange(of: viewModel.entities) { entities in
-//            guard isNowEnabled else { return }
-//
-//            withAnimation {
-//                proxy.scrollTo(BottomViewID(), anchor: .top)
-//            }
-//            // This is a workaround that fixes a scrolling issue when more
-//            // than one row is added at the time.
-//            DispatchQueue.main.async {
-//                proxy.scrollTo(BottomViewID(), anchor: .top)
-//            }
-//        }
-//        .onChange(of: isNowEnabled) {
-//            guard $0 else { return }
-//            proxy.scrollTo(BottomViewID(), anchor: .top)
-//        }
-//    }
+    private func registerNowMode<T: View>(for list: T) -> some View {
+        list.onChange(of: viewModel.entities) { entities in
+            guard isNowEnabled else { return }
+
+            withAnimation {
+                proxy.scrollTo(BottomViewID(), anchor: .top)
+            }
+            // This is a workaround that fixes a scrolling issue when more
+            // than one row is added at the time.
+            DispatchQueue.main.async {
+                proxy.scrollTo(BottomViewID(), anchor: .top)
+            }
+        }
+        .onChange(of: isNowEnabled) {
+            guard $0 else { return }
+            proxy.scrollTo(BottomViewID(), anchor: .top)
+        }
+    }
 
     // This view is used to keep scroll to the bottom and keep track of the
     // scroll position (near bottom or not).
