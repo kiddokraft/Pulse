@@ -53,7 +53,6 @@ struct ConsoleListContentView: View {
             ForEach(viewModel.visibleEntities, id: \.objectID) { entity in
                 let objectID = entity.objectID
                 ConsoleEntityCell(entity: entity)
-                    .drawingGroup()
                     .id(objectID)
 #if os(iOS) || os(visionOS)
                     .onAppear { viewModel.onAppearCell(with: objectID) }

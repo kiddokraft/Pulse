@@ -32,15 +32,11 @@ struct SettingsView: View {
                     Button("Show in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([store.storeURL])
                     }
-                    if !(store.options.contains(.readonly)) {
-                        Button("Remove Logs") {
-                            store.removeAll()
-                        }
-                    }
+              
                 }
             }.padding()
         }.listStyle(.plain)
-            .drawingGroup()
+           
     }
 }
 
