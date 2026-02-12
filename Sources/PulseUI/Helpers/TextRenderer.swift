@@ -238,6 +238,12 @@ final class TextRenderer {
             let inboundValue = task.connectionInboundType.map { "\(inbound) (\($0))" } ?? inbound
             connectionItems.append(("Inbound", inboundValue))
         }
+        if let user = task.connectionUser, !user.isEmpty {
+            connectionItems.append(("User", user))
+        }
+        if let fromOutbound = task.connectionFromOutbound, !fromOutbound.isEmpty {
+            connectionItems.append(("From Outbound", fromOutbound))
+        }
 
         if !connectionItems.isEmpty {
             let section = KeyValueSectionViewModel(title: "Connection", color: .blue, items: connectionItems)
@@ -264,23 +270,29 @@ final class TextRenderer {
             addSpacer()
         }
 
-        // Traffic section (only for closed connections)
-        if task.connectionState == .complete {
-            var trafficItems: [(String, String?)] = []
-            if let upload = task.connectionUpload {
+        // Traffic section
+        var trafficItems: [(String, String?)] = []
+        if let upload = task.connectionUpload {
+            if task.connectionState == .connected, let rate = task.connectionUploadRate {
+                trafficItems.append(("Upload", "\(upload) (\(rate))"))
+            } else {
                 trafficItems.append(("Upload", upload))
             }
-            if let download = task.connectionDownload {
+        }
+        if let download = task.connectionDownload {
+            if task.connectionState == .connected, let rate = task.connectionDownloadRate {
+                trafficItems.append(("Download", "\(download) (\(rate))"))
+            } else {
                 trafficItems.append(("Download", download))
             }
-            if task.effectiveDuration > 0 {
-                trafficItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
-            }
+        }
+        if task.effectiveDuration > 0 {
+            trafficItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
+        }
 
-            if !trafficItems.isEmpty {
-                let section = KeyValueSectionViewModel(title: "Traffic", color: .green, items: trafficItems)
-                string.append(render(section))
-            }
+        if !trafficItems.isEmpty {
+            let section = KeyValueSectionViewModel(title: "Traffic", color: .green, items: trafficItems)
+            string.append(render(section))
         }
 
         // Remove trailing newline if present
@@ -292,6 +304,9 @@ final class TextRenderer {
     /// Renders connection details section for the Details tab.
     func renderConnectionDetails(_ task: NetworkTaskEntity) {
         var connectionItems: [(String, String?)] = []
+        if let network = task.httpMethod {
+            connectionItems.append(("Network", network.uppercased()))
+        }
         if let source = task.connectionSource {
             connectionItems.append(("Source", source))
         }
@@ -310,6 +325,12 @@ final class TextRenderer {
         if let inbound = task.connectionInbound {
             let inboundValue = task.connectionInboundType.map { "\(inbound) (\($0))" } ?? inbound
             connectionItems.append(("Inbound", inboundValue))
+        }
+        if let user = task.connectionUser, !user.isEmpty {
+            connectionItems.append(("User", user))
+        }
+        if let fromOutbound = task.connectionFromOutbound, !fromOutbound.isEmpty {
+            connectionItems.append(("From Outbound", fromOutbound))
         }
 
         if !connectionItems.isEmpty {
@@ -342,10 +363,18 @@ final class TextRenderer {
     func renderConnectionTraffic(_ task: NetworkTaskEntity) {
         var trafficItems: [(String, String?)] = []
         if let upload = task.connectionUpload {
-            trafficItems.append(("Upload", upload))
+            if task.connectionState == .connected, let rate = task.connectionUploadRate {
+                trafficItems.append(("Upload", "\(upload) (\(rate))"))
+            } else {
+                trafficItems.append(("Upload", upload))
+            }
         }
         if let download = task.connectionDownload {
-            trafficItems.append(("Download", download))
+            if task.connectionState == .connected, let rate = task.connectionDownloadRate {
+                trafficItems.append(("Download", "\(download) (\(rate))"))
+            } else {
+                trafficItems.append(("Download", download))
+            }
         }
         if task.effectiveDuration > 0 {
             trafficItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))

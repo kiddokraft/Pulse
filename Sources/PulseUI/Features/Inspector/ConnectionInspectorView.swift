@@ -63,7 +63,7 @@ struct ConnectionInspectorView: View {
 
         // Connection Details
         Section("Connection") {
-            ConnectionDetailsView(task: task)
+            ConnectionDetailsSection(task: task)
         }
 
         // Routing Information
@@ -72,10 +72,8 @@ struct ConnectionInspectorView: View {
         }
 
         // Traffic Statistics
-        if task.connectionState == .complete {
-            Section("Traffic") {
-                ConnectionTrafficView(task: task)
-            }
+        Section("Traffic") {
+            ConnectionTrafficView(task: task)
         }
         
        
@@ -233,13 +231,22 @@ private struct ConnectionStatusView: View {
     }
 }
 
-// MARK: - Connection Details View
+// MARK: - Connection Details Section
 
 @available(iOS 15, visionOS 1.0, *)
-private struct ConnectionDetailsView: View {
+private struct ConnectionDetailsSection: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
+        // Network type (TCP/UDP)
+        if let network = task.httpMethod {
+            ConnectionDetailRow(title: "Network", value: network.uppercased())
+        }
+
+        if let ipVersion = task.connectionIPVersion, !ipVersion.isEmpty {
+            ConnectionDetailRow(title: "IP Version", value: ipVersion)
+        }
+
         if let source = task.connectionSource, !source.isEmpty {
             ConnectionDetailRow(title: "Source", value: source)
         }
@@ -270,6 +277,14 @@ private struct ConnectionDetailsView: View {
                     }
                 }
             }
+        }
+
+        if let user = task.connectionUser, !user.isEmpty {
+            ConnectionDetailRow(title: "User", value: user)
+        }
+
+        if let fromOutbound = task.connectionFromOutbound, !fromOutbound.isEmpty {
+            ConnectionDetailRow(title: "From Outbound", value: fromOutbound)
         }
     }
 }
@@ -319,23 +334,59 @@ private struct ConnectionTrafficView: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
+        // Upload total
         if let upload = task.connectionUpload {
             HStack {
                 Label("Upload", systemImage: "arrow.up").foregroundColor(.primary)
                 Spacer()
-                Text(upload)
-                    .foregroundColor(.secondary)
-                    .monospacedDigit()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(upload)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                    if task.connectionState == .connected,
+                       let rate = task.connectionUploadRate {
+                        Text(rate)
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                            .monospacedDigit()
+                    }
+                }
             }
         }
 
+        // Download total
         if let download = task.connectionDownload {
             HStack {
-                Label("Download", systemImage: "arrow.down")  .foregroundColor(.primary)
+                Label("Download", systemImage: "arrow.down").foregroundColor(.primary)
                 Spacer()
-                Text(download)
-                    .foregroundColor(.secondary)
-                    .monospacedDigit()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(download)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                    if task.connectionState == .connected,
+                       let rate = task.connectionDownloadRate {
+                        Text(rate)
+                            .font(.caption)
+                            .foregroundColor(.purple)
+                            .monospacedDigit()
+                    }
+                }
+            }
+        }
+
+        // Transfer rate for completed connections
+        if task.connectionState == .complete, task.effectiveDuration > 0 {
+            let uploadBytes = task.connectionUploadBytes ?? 0
+            let downloadBytes = task.connectionDownloadBytes ?? 0
+            let totalBytes = uploadBytes + downloadBytes
+            if totalBytes > 0 {
+                HStack {
+                    Label("Avg Rate", systemImage: "speedometer").foregroundColor(.primary)
+                    Spacer()
+                    Text(ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary) + "/s")
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
             }
         }
     }
@@ -349,123 +400,8 @@ private struct ConnectionTimingView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Use TimingView for the timeline chart
-//            if task.effectiveDuration > 0 {
-                TimingView(viewModel: makeTimingViewModel())
-//            }
-
-            // Additional timing info
-//            VStack(spacing: 8) {
-//                if let start = task.createdAt as Date? {
-//                    HStack {
-//                        Text("Started")
-//                            .foregroundColor(.secondary)
-//                        Spacer()
-//                        Text(start, style: .time)
-//                            .font(.system(.body, design: .monospaced))
-//                            .foregroundColor(.secondary)
-//                    }
-//                }
-//
-//                if task.connectionState == .complete, task.effectiveDuration > 0 {
-//                    HStack {
-//                        Text("Duration")
-//                            .foregroundColor(.secondary)
-//                        Spacer()
-//                        Text(DurationFormatter.string(from: task.effectiveDuration))
-//                            .font(.system(.body, design: .monospaced))
-//                            .foregroundColor(.secondary)
-//                    }
-//
-//                    // Transfer rate
-//                    if let upload = task.connectionUpload, let download = task.connectionDownload {
-//                        let uploadBytes = parseBytes(upload)
-//                        let downloadBytes = parseBytes(download)
-//                        let totalBytes = uploadBytes + downloadBytes
-//                        if totalBytes > 0 {
-//                            HStack {
-//                                Text("Transfer Rate")
-//                                    .foregroundColor(.secondary)
-//                                Spacer()
-//                                Text(ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary) + "/s")
-//                                    .font(.system(.body, design: .monospaced))
-//                                    .foregroundColor(.secondary)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
         }
-    }
-
-    private func makeTimingViewModel() -> TimingViewModel {
-        let duration = task.effectiveDuration
-        let durationStr = DurationFormatter.string(from: duration)
-
-        var rows: [TimingRowViewModel] = []
-
-        // Connection duration bar
-        let color: UXColor = task.connectionState == .connected ? .systemOrange : .systemGreen
-        rows.append(TimingRowViewModel(
-            title: "Connection",
-            value: durationStr,
-            color: color,
-            start: 0.0,
-            length: 1.0
-        ))
-
-        // Add upload/download visualization if we have data
-        if task.connectionState == .complete,
-           let upload = task.connectionUpload,
-           let download = task.connectionDownload {
-            let uploadBytes = parseBytes(upload)
-            let downloadBytes = parseBytes(download)
-            let totalBytes = uploadBytes + downloadBytes
-
-            if totalBytes > 0 {
-                let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
-
-                rows.append(TimingRowViewModel(
-                    title: "Upload",
-                    value: upload,
-                    color: .systemBlue,
-                    start: 0.0,
-                    length: uploadRatio
-                ))
-
-                rows.append(TimingRowViewModel(
-                    title: "Download",
-                    value: download,
-                    color: .systemPurple,
-                    start: uploadRatio,
-                    length: 1.0 - uploadRatio
-                ))
-            }
-        }
-
-        let section = TimingRowSectionViewModel(title: "Timeline", items: rows)
-        return TimingViewModel(sections: [section])
-    }
-
-    private func parseBytes(_ string: String) -> Int64 {
-        // Parse strings like "1.5 MB", "256 KB", etc.
-        let components = string.components(separatedBy: " ")
-        guard components.count >= 2,
-              let value = Double(components[0]) else {
-            return 0
-        }
-
-        let unit = components[1].uppercased()
-        let multiplier: Int64
-        switch unit {
-        case "B", "BYTES": multiplier = 1
-        case "KB": multiplier = 1024
-        case "MB": multiplier = 1024 * 1024
-        case "GB": multiplier = 1024 * 1024 * 1024
-        default: multiplier = 1
-        }
-
-        return Int64(value * Double(multiplier))
     }
 }
 
@@ -545,80 +481,137 @@ private struct ConnectionTimingViewMac: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
-        TimingView(viewModel: makeTimingViewModel())
-                    .padding()
-
-    }
-
-    private func makeTimingViewModel() -> TimingViewModel {
-        let duration = task.effectiveDuration
-        let durationStr = DurationFormatter.string(from: duration)
-
-        var rows: [TimingRowViewModel] = []
-
-        // Connection duration bar
-        let color: UXColor = task.connectionState == .connected ? .systemOrange : .systemGreen
-        rows.append(TimingRowViewModel(
-            title: "Connection",
-            value: durationStr,
-            color: color,
-            start: 0.0,
-            length: 1.0
-        ))
-
-        // Add upload/download visualization if we have data
-        if task.connectionState == .complete,
-           let upload = task.connectionUpload,
-           let download = task.connectionDownload {
-            let uploadBytes = parseBytes(upload)
-            let downloadBytes = parseBytes(download)
-            let totalBytes = uploadBytes + downloadBytes
-
-            if totalBytes > 0 {
-                let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
-
-                rows.append(TimingRowViewModel(
-                    title: "Upload",
-                    value: upload,
-                    color: .systemBlue,
-                    start: 0.0,
-                    length: uploadRatio
-                ))
-
-                rows.append(TimingRowViewModel(
-                    title: "Download",
-                    value: download,
-                    color: .systemPurple,
-                    start: uploadRatio,
-                    length: 1.0 - uploadRatio
-                ))
-            }
-        }
-
-        let section = TimingRowSectionViewModel(title: "Timeline", items: rows)
-        return TimingViewModel(sections: [section])
-    }
-
-    private func parseBytes(_ string: String) -> Int64 {
-        let components = string.components(separatedBy: " ")
-        guard components.count >= 2,
-              let value = Double(components[0]) else {
-            return 0
-        }
-        let unit = components[1].uppercased()
-        let multiplier: Int64
-        switch unit {
-        case "B", "BYTES": multiplier = 1
-        case "KB": multiplier = 1024
-        case "MB": multiplier = 1024 * 1024
-        case "GB": multiplier = 1024 * 1024 * 1024
-        default: multiplier = 1
-        }
-        return Int64(value * Double(multiplier))
+        TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+            .padding()
     }
 }
 
 #endif
+
+// MARK: - Shared Timing Builder (all platforms)
+
+/// Shared timing view model builder used by both iOS and macOS.
+enum ConnectionTimingBuilder {
+    static func makeTimingViewModel(for task: NetworkTaskEntity) -> TimingViewModel {
+        let duration = task.effectiveDuration
+        let uploadBytes = task.connectionUploadBytes ?? 0
+        let downloadBytes = task.connectionDownloadBytes ?? 0
+        let totalBytes = uploadBytes + downloadBytes
+        let isActive = task.connectionState == .connected
+
+        // --- Connection lifecycle section ---
+        var lifecycleRows: [TimingRowViewModel] = []
+
+        if isActive {
+            // Active connection: show elapsed time as a partial bar
+            let durationStr = duration > 0
+                ? DurationFormatter.string(from: duration)
+                : "< 1s"
+            lifecycleRows.append(TimingRowViewModel(
+                title: "Elapsed",
+                value: durationStr,
+                color: .systemOrange,
+                start: 0.0,
+                length: 0.85 // Partial bar to visually indicate ongoing
+            ))
+        } else {
+            // Completed: show full duration bar
+            let durationStr = DurationFormatter.string(from: duration)
+            lifecycleRows.append(TimingRowViewModel(
+                title: "Duration",
+                value: durationStr,
+                color: .systemGreen,
+                start: 0.0,
+                length: 1.0
+            ))
+        }
+
+        let lifecycleSection = TimingRowSectionViewModel(
+            title: isActive ? "Active Connection" : "Connection",
+            items: lifecycleRows
+        )
+
+        // --- Transfer section ---
+        var transferRows: [TimingRowViewModel] = []
+
+        if totalBytes > 0 {
+            let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
+            let downloadRatio = CGFloat(downloadBytes) / CGFloat(totalBytes)
+
+            let uploadStr: String
+            let downloadStr: String
+            if isActive {
+                // Show rate + total for active connections
+                let upRate = task.connectionUploadRate ?? ""
+                let downRate = task.connectionDownloadRate ?? ""
+                uploadStr = (task.connectionUpload ?? "0 B") + (upRate.isEmpty ? "" : " (\(upRate))")
+                downloadStr = (task.connectionDownload ?? "0 B") + (downRate.isEmpty ? "" : " (\(downRate))")
+            } else {
+                uploadStr = task.connectionUpload ?? "0 B"
+                downloadStr = task.connectionDownload ?? "0 B"
+            }
+
+            transferRows.append(TimingRowViewModel(
+                title: "Upload",
+                value: uploadStr,
+                color: .systemBlue,
+                start: 0.0,
+                length: max(0.02, uploadRatio) // Minimum visible width
+            ))
+
+            transferRows.append(TimingRowViewModel(
+                title: "Download",
+                value: downloadStr,
+                color: .systemPurple,
+                start: 0.0,
+                length: max(0.02, downloadRatio) // Minimum visible width
+            ))
+
+            // Show avg transfer rate for completed connections
+            if !isActive, duration > 0 {
+                let rateStr = ByteCountFormatter.string(
+                    fromByteCount: Int64(Double(totalBytes) / duration),
+                    countStyle: .binary
+                ) + "/s"
+                transferRows.append(TimingRowViewModel(
+                    title: "Avg Rate",
+                    value: rateStr,
+                    color: .systemTeal,
+                    start: 0.0,
+                    length: 1.0
+                ))
+            }
+        } else if isActive {
+            // Active but no data yet - show waiting state
+            transferRows.append(TimingRowViewModel(
+                title: "Upload",
+                value: "0 B",
+                color: .systemBlue,
+                start: 0.0,
+                length: 0.02
+            ))
+            transferRows.append(TimingRowViewModel(
+                title: "Download",
+                value: "0 B",
+                color: .systemPurple,
+                start: 0.0,
+                length: 0.02
+            ))
+        }
+
+        var sections = [lifecycleSection]
+        if !transferRows.isEmpty {
+            let transferSection = TimingRowSectionViewModel(
+                title: "Transfer",
+                items: transferRows,
+                isHeader: true
+            )
+            sections.append(transferSection)
+        }
+
+        return TimingViewModel(sections: sections)
+    }
+}
 
 // MARK: - watchOS & tvOS Stubs
 

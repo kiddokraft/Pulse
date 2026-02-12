@@ -177,6 +177,40 @@ extension NetworkTaskEntity {
         response?.headers["Connection-Chain"]
     }
 
+    /// User identity
+    var connectionUser: String? {
+        originalRequest?.headers["Connection-User"]
+    }
+
+    /// From outbound tag
+    var connectionFromOutbound: String? {
+        originalRequest?.headers["Connection-From-Outbound"]
+    }
+
+    /// Upload rate (formatted string like "1.5 KB/s")
+    var connectionUploadRate: String? {
+        response?.headers["Connection-Upload-Rate"]
+    }
+
+    /// Download rate (formatted string like "2.3 MB/s")
+    var connectionDownloadRate: String? {
+        response?.headers["Connection-Download-Rate"]
+    }
+
+    /// Raw upload bytes
+    var connectionUploadBytes: Int64? {
+        guard let str = response?.headers["Connection-Upload-Bytes"],
+              let val = Int64(str) else { return nil }
+        return val
+    }
+
+    /// Raw download bytes
+    var connectionDownloadBytes: Int64? {
+        guard let str = response?.headers["Connection-Download-Bytes"],
+              let val = Int64(str) else { return nil }
+        return val
+    }
+
     /// Connection duration in seconds (calculated from createdAt/closedAt timestamps)
     var connectionDuration: TimeInterval? {
         guard let durationStr = response?.headers["Connection-Duration"],

@@ -25,9 +25,13 @@ extension LoggerStore {
         public let ipVersion: Int32
         public let uplinkTotal: Int64
         public let downlinkTotal: Int64
+        public let uplinkRate: Int64        // Current upload speed (bytes/s)
+        public let downlinkRate: Int64      // Current download speed (bytes/s)
         public let createdAt: Int64
         public let closedAt: Int64
         public let chain: [String]
+        public let user: String
+        public let fromOutbound: String
 
         public init(
             id: String,
@@ -46,7 +50,11 @@ extension LoggerStore {
             downlinkTotal: Int64,
             createdAt: Int64,
             closedAt: Int64,
-            chain: [String] = []
+            chain: [String] = [],
+            uplinkRate: Int64 = 0,
+            downlinkRate: Int64 = 0,
+            user: String = "",
+            fromOutbound: String = ""
         ) {
             self.id = id
             self.network = network
@@ -62,9 +70,13 @@ extension LoggerStore {
             self.ipVersion = ipVersion
             self.uplinkTotal = uplinkTotal
             self.downlinkTotal = downlinkTotal
+            self.uplinkRate = uplinkRate
+            self.downlinkRate = downlinkRate
             self.createdAt = createdAt
             self.closedAt = closedAt
             self.chain = chain
+            self.user = user
+            self.fromOutbound = fromOutbound
         }
     }
 
@@ -112,6 +124,12 @@ extension LoggerStore {
         }
         request.setValue(connection.inbound, forHTTPHeaderField: "Connection-Inbound")
         request.setValue(connection.inboundType, forHTTPHeaderField: "Connection-Inbound-Type")
+        if !connection.user.isEmpty {
+            request.setValue(connection.user, forHTTPHeaderField: "Connection-User")
+        }
+        if !connection.fromOutbound.isEmpty {
+            request.setValue(connection.fromOutbound, forHTTPHeaderField: "Connection-From-Outbound")
+        }
 
         // Create response with outbound/routing info in headers
         var responseHeaders: [String: String] = [:]
@@ -120,6 +138,14 @@ extension LoggerStore {
         responseHeaders["Connection-Rule"] = connection.rule
         responseHeaders["Connection-Upload"] = formatBytes(connection.uplinkTotal)
         responseHeaders["Connection-Download"] = formatBytes(connection.downlinkTotal)
+        responseHeaders["Connection-Upload-Bytes"] = String(connection.uplinkTotal)
+        responseHeaders["Connection-Download-Bytes"] = String(connection.downlinkTotal)
+        if connection.uplinkRate > 0 {
+            responseHeaders["Connection-Upload-Rate"] = formatBytes(connection.uplinkRate) + "/s"
+        }
+        if connection.downlinkRate > 0 {
+            responseHeaders["Connection-Download-Rate"] = formatBytes(connection.downlinkRate) + "/s"
+        }
         if !connection.chain.isEmpty {
             responseHeaders["Connection-Chain"] = connection.chain.joined(separator: " → ")
         }
