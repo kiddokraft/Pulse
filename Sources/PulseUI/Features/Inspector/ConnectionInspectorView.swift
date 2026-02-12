@@ -499,25 +499,23 @@ enum ConnectionTimingBuilder {
         let totalBytes = uploadBytes + downloadBytes
         let isActive = task.connectionState == .connected
 
-        // --- Connection lifecycle section ---
-        var lifecycleRows: [TimingRowViewModel] = []
+        var rows: [TimingRowViewModel] = []
 
+        // Connection duration
         if isActive {
-            // Active connection: show elapsed time as a partial bar
             let durationStr = duration > 0
                 ? DurationFormatter.string(from: duration)
                 : "< 1s"
-            lifecycleRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Elapsed",
                 value: durationStr,
                 color: .systemOrange,
                 start: 0.0,
-                length: 0.85 // Partial bar to visually indicate ongoing
+                length: 0.85
             ))
         } else {
-            // Completed: show full duration bar
             let durationStr = DurationFormatter.string(from: duration)
-            lifecycleRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Duration",
                 value: durationStr,
                 color: .systemGreen,
@@ -526,14 +524,7 @@ enum ConnectionTimingBuilder {
             ))
         }
 
-        let lifecycleSection = TimingRowSectionViewModel(
-            title: isActive ? "Active Connection" : "Connection",
-            items: lifecycleRows
-        )
-
-        // --- Transfer section ---
-        var transferRows: [TimingRowViewModel] = []
-
+        // Upload / Download
         if totalBytes > 0 {
             let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
             let downloadRatio = CGFloat(downloadBytes) / CGFloat(totalBytes)
@@ -541,7 +532,6 @@ enum ConnectionTimingBuilder {
             let uploadStr: String
             let downloadStr: String
             if isActive {
-                // Show rate + total for active connections
                 let upRate = task.connectionUploadRate ?? ""
                 let downRate = task.connectionDownloadRate ?? ""
                 uploadStr = (task.connectionUpload ?? "0 B") + (upRate.isEmpty ? "" : " (\(upRate))")
@@ -551,46 +541,30 @@ enum ConnectionTimingBuilder {
                 downloadStr = task.connectionDownload ?? "0 B"
             }
 
-            transferRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Upload",
                 value: uploadStr,
                 color: .systemBlue,
                 start: 0.0,
-                length: max(0.02, uploadRatio) // Minimum visible width
+                length: max(0.02, uploadRatio)
             ))
 
-            transferRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Download",
                 value: downloadStr,
                 color: .systemPurple,
                 start: 0.0,
-                length: max(0.02, downloadRatio) // Minimum visible width
+                length: max(0.02, downloadRatio)
             ))
-
-            // Show avg transfer rate for completed connections
-            if !isActive, duration > 0 {
-                let rateStr = ByteCountFormatter.string(
-                    fromByteCount: Int64(Double(totalBytes) / duration),
-                    countStyle: .binary
-                ) + "/s"
-                transferRows.append(TimingRowViewModel(
-                    title: "Avg Rate",
-                    value: rateStr,
-                    color: .systemTeal,
-                    start: 0.0,
-                    length: 1.0
-                ))
-            }
         } else if isActive {
-            // Active but no data yet - show waiting state
-            transferRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Upload",
                 value: "0 B",
                 color: .systemBlue,
                 start: 0.0,
                 length: 0.02
             ))
-            transferRows.append(TimingRowViewModel(
+            rows.append(TimingRowViewModel(
                 title: "Download",
                 value: "0 B",
                 color: .systemPurple,
@@ -599,17 +573,11 @@ enum ConnectionTimingBuilder {
             ))
         }
 
-        var sections = [lifecycleSection]
-        if !transferRows.isEmpty {
-            let transferSection = TimingRowSectionViewModel(
-                title: "Transfer",
-                items: transferRows,
-                isHeader: true
-            )
-            sections.append(transferSection)
-        }
-
-        return TimingViewModel(sections: sections)
+        let section = TimingRowSectionViewModel(
+            title: isActive ? "Active Connection" : "Connection",
+            items: rows
+        )
+        return TimingViewModel(sections: [section])
     }
 }
 
