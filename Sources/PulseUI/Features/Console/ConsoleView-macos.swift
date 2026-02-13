@@ -22,7 +22,7 @@ public struct ConsoleView: View {
                 ConsoleMainView(environment: environment)
             }
             .injecting(environment)
-            .navigationTitle("")
+            .navigationTitle("Console")
         } else {
             PlaceholderView(imageName: "xmark.octagon", title: "Unsupported", subtitle: "Pulse requires macOS 13 or later").padding()
         }
