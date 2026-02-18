@@ -496,82 +496,76 @@ enum ConnectionTimingBuilder {
         let duration = task.effectiveDuration
         let uploadBytes = task.connectionUploadBytes ?? 0
         let downloadBytes = task.connectionDownloadBytes ?? 0
-        let totalBytes = uploadBytes + downloadBytes
         let isActive = task.connectionState == .connected
+        let maxBytes = max(uploadBytes, downloadBytes)
 
         var rows: [TimingRowViewModel] = []
 
-        // Connection duration
-        if isActive {
-            let durationStr = duration > 0
-                ? DurationFormatter.string(from: duration)
-                : "< 1s"
-            rows.append(TimingRowViewModel(
-                title: "Elapsed",
-                value: durationStr,
-                color: .systemOrange,
-                start: 0.0,
-                length: 0.85
-            ))
+        // Upload bar — length relative to max(upload, download) so bars are visually comparable
+        let uploadStr: String
+        if isActive, let rate = task.connectionUploadRate {
+            uploadStr = (task.connectionUpload ?? "0 B") + " (\(rate))"
         } else {
-            let durationStr = DurationFormatter.string(from: duration)
+            uploadStr = task.connectionUpload ?? "0 B"
+        }
+        let uploadLength: CGFloat = maxBytes > 0 ? max(0.02, CGFloat(uploadBytes) / CGFloat(maxBytes)) : 0.02
+        rows.append(TimingRowViewModel(
+            title: "Upload",
+            value: uploadStr,
+            color: .systemBlue,
+            start: 0.0,
+            length: uploadLength
+        ))
+
+        // Download bar — same scale as upload
+        let downloadStr: String
+        if isActive, let rate = task.connectionDownloadRate {
+            downloadStr = (task.connectionDownload ?? "0 B") + " (\(rate))"
+        } else {
+            downloadStr = task.connectionDownload ?? "0 B"
+        }
+        let downloadLength: CGFloat = maxBytes > 0 ? max(0.02, CGFloat(downloadBytes) / CGFloat(maxBytes)) : 0.02
+        rows.append(TimingRowViewModel(
+            title: "Download",
+            value: downloadStr,
+            color: .systemPurple,
+            start: 0.0,
+            length: downloadLength
+        ))
+
+        // Throughput bar — average bytes/sec over duration, scaled relative to a readable reference
+        if duration > 0 {
+            let totalBytes = uploadBytes + downloadBytes
+            let bytesPerSec = Double(totalBytes) / duration
+            let throughputStr = ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .binary) + "/s"
+            // Scale bar: log-based so both slow and fast connections show meaningful bars
+            // Reference: 100 MB/s = full bar
+            let reference = 100.0 * 1024.0 * 1024.0
+            let normalizedRate = min(1.0, bytesPerSec / reference)
+            let logLength = normalizedRate > 0 ? CGFloat(log10(1 + normalizedRate * 9)) : 0.0 // log10(1..10) → 0..1
             rows.append(TimingRowViewModel(
-                title: "Duration",
-                value: durationStr,
+                title: "Avg Rate",
+                value: throughputStr,
                 color: .systemGreen,
                 start: 0.0,
-                length: 1.0
+                length: max(0.02, logLength)
             ))
         }
 
-        // Upload / Download
-        if totalBytes > 0 {
-            let uploadRatio = CGFloat(uploadBytes) / CGFloat(totalBytes)
-            let downloadRatio = CGFloat(downloadBytes) / CGFloat(totalBytes)
-
-            let uploadStr: String
-            let downloadStr: String
-            if isActive {
-                let upRate = task.connectionUploadRate ?? ""
-                let downRate = task.connectionDownloadRate ?? ""
-                uploadStr = (task.connectionUpload ?? "0 B") + (upRate.isEmpty ? "" : " (\(upRate))")
-                downloadStr = (task.connectionDownload ?? "0 B") + (downRate.isEmpty ? "" : " (\(downRate))")
-            } else {
-                uploadStr = task.connectionUpload ?? "0 B"
-                downloadStr = task.connectionDownload ?? "0 B"
-            }
-
-            rows.append(TimingRowViewModel(
-                title: "Upload",
-                value: uploadStr,
-                color: .systemBlue,
-                start: 0.0,
-                length: max(0.02, uploadRatio)
-            ))
-
-            rows.append(TimingRowViewModel(
-                title: "Download",
-                value: downloadStr,
-                color: .systemPurple,
-                start: 0.0,
-                length: max(0.02, downloadRatio)
-            ))
-        } else if isActive {
-            rows.append(TimingRowViewModel(
-                title: "Upload",
-                value: "0 B",
-                color: .systemBlue,
-                start: 0.0,
-                length: 0.02
-            ))
-            rows.append(TimingRowViewModel(
-                title: "Download",
-                value: "0 B",
-                color: .systemPurple,
-                start: 0.0,
-                length: 0.02
-            ))
+        // Duration row
+        let durationStr: String
+        if isActive {
+            durationStr = duration > 0 ? DurationFormatter.string(from: duration) : "< 1s"
+        } else {
+            durationStr = DurationFormatter.string(from: duration)
         }
+        rows.append(TimingRowViewModel(
+            title: isActive ? "Elapsed" : "Duration",
+            value: durationStr,
+            color: isActive ? .systemOrange : .systemGray,
+            start: 0.0,
+            length: 0.0 // No bar — duration has no relative scale
+        ))
 
         let section = TimingRowSectionViewModel(
             title: isActive ? "Active Connection" : "Connection",
