@@ -40,8 +40,6 @@ private struct ConsoleMainView: View {
     @State private var isShowingSessions = false
     @State private var isShowingSettings = false
 
-    @SceneStorage("com-github-kean-pulse-is-now-enabled") private var isNowEnabled = true
-
     var body: some View {
         HSplitView {
             contentView
@@ -88,9 +86,6 @@ private struct ConsoleMainView: View {
     @ViewBuilder
     private var contentToolbarNavigationItems: some View {
         if !(environment.store.options.contains(.readonly)) {
-            Toggle(isOn: $isNowEnabled) {
-                Label("Current", systemImage: "clock")
-            }
             Button(action: { isSharingStore = true }) {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
