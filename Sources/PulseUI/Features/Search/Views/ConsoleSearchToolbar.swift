@@ -12,7 +12,6 @@ import Combine
 @available(iOS 15, visionOS 1.0, *)
 struct ConsoleSearchToolbar: View {
     @EnvironmentObject private var viewModel: ConsoleSearchViewModel
-    @State private var isShowingScopesPicker = false
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
@@ -53,12 +52,6 @@ struct ConsoleSearchToolbar: View {
 #else
             HStack {
                 ConsoleSearchStringOptionsView(viewModel: viewModel)
-                ConsoleSearchPickScopesButton {
-                    isShowingScopesPicker.toggle()
-                }.popover(isPresented: $isShowingScopesPicker, arrowEdge: .top) {
-                    ConsoleSearchScopesPicker(viewModel: viewModel)
-                        .padding()
-                }
             }
 #endif
     }

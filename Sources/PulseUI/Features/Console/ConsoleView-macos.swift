@@ -42,14 +42,14 @@ private struct ConsoleMainView: View {
 
     var body: some View {
         HSplitView {
-            contentView
-            detailsView.layoutPriority(1)
+            contentView.layoutPriority(1)
+            detailsView
         }
     }
 
     private var contentView: some View {
         ConsoleListView()
-            .frame(minWidth: 200, idealWidth: 400, minHeight: 120, idealHeight: 480)
+            .frame(minWidth: 300, idealWidth: 800, minHeight: 120, idealHeight: 480)
             .toolbar {
                 ToolbarItemGroup(placement: .automatic) {
                     contentToolbarNavigationItems
@@ -112,7 +112,7 @@ private struct _ConsoleDetailsView: View {
         if let selection = router.selection {
             ConsoleEntityDetailsRouterView(selection: selection)
                 .background(Color(UXColor.textBackgroundColor))
-                .frame(minWidth: 400, idealWidth: 700, minHeight: 120, idealHeight: 480)
+                .frame(minWidth: 300, idealWidth: 400, minHeight: 120, idealHeight: 480)
         }
     }
 }

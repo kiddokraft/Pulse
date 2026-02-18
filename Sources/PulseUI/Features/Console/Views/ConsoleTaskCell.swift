@@ -141,16 +141,14 @@ struct ConsoleTaskCell: View {
 
     private var connectionInfoText: Text {
         var text = Text(task.httpMethod ?? "TCP")
-        if task.connectionState == .complete {
-            let upload = task.connectionUpload ?? "0 KB"
-            let download = task.connectionDownload ?? "0 KB"
-            text = text + Text("    ") +
-            makeInfoText("arrow.up", upload) + Text("    ") +
-            makeInfoText("arrow.down", download)
-            if task.duration > 0 {
-                text = text + Text("     ") +
-                makeInfoText("clock", ConsoleFormatter.duration(for: task) ?? "–")
-            }
+        let upload = task.connectionUpload ?? "0 KB"
+        let download = task.connectionDownload ?? "0 KB"
+        text = text + Text("    ") +
+        makeInfoText("arrow.up", upload) + Text("    ") +
+        makeInfoText("arrow.down", download)
+        if task.duration > 0 {
+            text = text + Text("     ") +
+            makeInfoText("clock", ConsoleFormatter.duration(for: task) ?? "–")
         }
         return text
     }

@@ -119,19 +119,23 @@ struct ConsoleSearchResultView: View {
 #else
     @ViewBuilder
     private static func _makeDestination(for occurrence: ConsoleSearchOccurrence, task: NetworkTaskEntity) -> some View {
-        switch occurrence.scope {
-        case .originalRequestHeaders:
-            NetworkInspectorView(task: task, tab: .headers)
-        case .currentRequestHeaders:
-            NetworkInspectorView(task: task, tab: .headers)
-        case .requestBody:
-            NetworkInspectorView(task: task, tab: .request)
-        case .responseHeaders:
-            NetworkInspectorView(task: task, tab: .headers)
-        case .responseBody:
-            NetworkInspectorView(task: task, tab: .response)
-        case .url, .message, .metadata:
-            EmptyView()
+        if task.isConnection {
+            ConnectionInspectorView(task: task)
+        } else {
+            switch occurrence.scope {
+            case .originalRequestHeaders:
+                NetworkInspectorView(task: task, tab: .headers)
+            case .currentRequestHeaders:
+                NetworkInspectorView(task: task, tab: .headers)
+            case .requestBody:
+                NetworkInspectorView(task: task, tab: .request)
+            case .responseHeaders:
+                NetworkInspectorView(task: task, tab: .headers)
+            case .responseBody:
+                NetworkInspectorView(task: task, tab: .response)
+            case .url, .message, .metadata:
+                EmptyView()
+            }
         }
     }
 #endif
