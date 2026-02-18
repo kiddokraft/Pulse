@@ -93,7 +93,6 @@ private struct TimingRowView: View {
                 .padding(.leading, proxy.size.width * start)
         }
         .frame(height: barHeight * sizeCategory.scale)
-
     }
 
     private func makeTitle(_ text: String) -> some View {

@@ -374,21 +374,6 @@ private struct ConnectionTrafficView: View {
             }
         }
 
-        // Transfer rate for completed connections
-        if task.connectionState == .complete, task.effectiveDuration > 0 {
-            let uploadBytes = task.connectionUploadBytes ?? 0
-            let downloadBytes = task.connectionDownloadBytes ?? 0
-            let totalBytes = uploadBytes + downloadBytes
-            if totalBytes > 0 {
-                HStack {
-                    Label("Avg Rate", systemImage: "speedometer").foregroundColor(.primary)
-                    Spacer()
-                    Text(ByteCountFormatter.string(fromByteCount: Int64(Double(totalBytes) / task.effectiveDuration), countStyle: .binary) + "/s")
-                        .foregroundColor(.secondary)
-                        .monospacedDigit()
-                }
-            }
-        }
     }
 }
 
@@ -397,10 +382,17 @@ private struct ConnectionTrafficView: View {
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionTimingView: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var tick: UInt = 0
 
     var body: some View {
+        let _ = tick // Force re-eval on tick change
         VStack(spacing: 16) {
             TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if task.connectionState == .connected {
+                tick &+= 1
+            }
         }
     }
 }
@@ -479,10 +471,17 @@ struct ConnectionInspectorView: View {
 @available(macOS 13, *)
 private struct ConnectionTimingViewMac: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var tick: UInt = 0
 
     var body: some View {
+        let _ = tick
         TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
             .padding()
+            .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+                if task.connectionState == .connected {
+                    tick &+= 1
+                }
+            }
     }
 }
 
@@ -493,78 +492,43 @@ private struct ConnectionTimingViewMac: View {
 /// Shared timing view model builder used by both iOS and macOS.
 enum ConnectionTimingBuilder {
     static func makeTimingViewModel(for task: NetworkTaskEntity) -> TimingViewModel {
-        let duration = task.effectiveDuration
         let uploadBytes = task.connectionUploadBytes ?? 0
         let downloadBytes = task.connectionDownloadBytes ?? 0
+        let totalBytes = uploadBytes + downloadBytes
         let isActive = task.connectionState == .connected
-        let maxBytes = max(uploadBytes, downloadBytes)
 
         var rows: [TimingRowViewModel] = []
 
-        // Upload bar — length relative to max(upload, download) so bars are visually comparable
+        // Upload bar — starts at 0, length = upload share of total
         let uploadStr: String
         if isActive, let rate = task.connectionUploadRate {
             uploadStr = (task.connectionUpload ?? "0 B") + " (\(rate))"
         } else {
             uploadStr = task.connectionUpload ?? "0 B"
         }
-        let uploadLength: CGFloat = maxBytes > 0 ? max(0.02, CGFloat(uploadBytes) / CGFloat(maxBytes)) : 0.02
+        let uploadFraction: CGFloat = totalBytes > 0 ? CGFloat(uploadBytes) / CGFloat(totalBytes) : 0.5
         rows.append(TimingRowViewModel(
             title: "Upload",
             value: uploadStr,
             color: .systemBlue,
             start: 0.0,
-            length: uploadLength
+            length: max(0.02, uploadFraction)
         ))
 
-        // Download bar — same scale as upload
+        // Download bar — starts where upload ends, length = download share of total
         let downloadStr: String
         if isActive, let rate = task.connectionDownloadRate {
             downloadStr = (task.connectionDownload ?? "0 B") + " (\(rate))"
         } else {
             downloadStr = task.connectionDownload ?? "0 B"
         }
-        let downloadLength: CGFloat = maxBytes > 0 ? max(0.02, CGFloat(downloadBytes) / CGFloat(maxBytes)) : 0.02
+        let downloadFraction: CGFloat = totalBytes > 0 ? CGFloat(downloadBytes) / CGFloat(totalBytes) : 0.5
         rows.append(TimingRowViewModel(
             title: "Download",
             value: downloadStr,
             color: .systemPurple,
-            start: 0.0,
-            length: downloadLength
-        ))
-
-        // Throughput bar — average bytes/sec over duration, scaled relative to a readable reference
-        if duration > 0 {
-            let totalBytes = uploadBytes + downloadBytes
-            let bytesPerSec = Double(totalBytes) / duration
-            let throughputStr = ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .binary) + "/s"
-            // Scale bar: log-based so both slow and fast connections show meaningful bars
-            // Reference: 100 MB/s = full bar
-            let reference = 100.0 * 1024.0 * 1024.0
-            let normalizedRate = min(1.0, bytesPerSec / reference)
-            let logLength = normalizedRate > 0 ? CGFloat(log10(1 + normalizedRate * 9)) : 0.0 // log10(1..10) → 0..1
-            rows.append(TimingRowViewModel(
-                title: "Avg Rate",
-                value: throughputStr,
-                color: .systemGreen,
-                start: 0.0,
-                length: max(0.02, logLength)
-            ))
-        }
-
-        // Duration row
-        let durationStr: String
-        if isActive {
-            durationStr = duration > 0 ? DurationFormatter.string(from: duration) : "< 1s"
-        } else {
-            durationStr = DurationFormatter.string(from: duration)
-        }
-        rows.append(TimingRowViewModel(
-            title: isActive ? "Elapsed" : "Duration",
-            value: durationStr,
-            color: isActive ? .systemOrange : .systemGray,
-            start: 0.0,
-            length: 0.0 // No bar — duration has no relative scale
+            start: totalBytes > 0 ? uploadFraction : 0.5,
+            length: max(0.02, downloadFraction)
         ))
 
         let section = TimingRowSectionViewModel(
