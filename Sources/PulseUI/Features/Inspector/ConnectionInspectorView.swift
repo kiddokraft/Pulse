@@ -17,21 +17,23 @@ struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
 
     @State private var shareItems: ShareItems?
+    @State private var tick: UInt = 0
     @EnvironmentObject private var environment: ConsoleEnvironment
     @Environment(\.store) private var store
 
     var body: some View {
+        let _ = tick
         VStack(spacing: 0){
-          
-            
+
+
             List {
-           
+
                     ConnectionTimingView(task: task)
-                
+
                 contents
             }
             .listStyle(.inset)
-          
+
         }
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -40,6 +42,11 @@ struct ConnectionInspectorView: View {
         }
         .inlineNavigationTitle(task.connectionDomain ?? task.host ?? "Connection")
         .sheet(item: $shareItems, content: ShareView.init)
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if task.connectionState == .connected {
+                tick &+= 1
+            }
+        }
     }
 
     @ViewBuilder
@@ -382,17 +389,10 @@ private struct ConnectionTrafficView: View {
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionTimingView: View {
     @ObservedObject var task: NetworkTaskEntity
-    @State private var tick: UInt = 0
 
     var body: some View {
-        let _ = tick // Force re-eval on tick change
         VStack(spacing: 16) {
             TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
-        }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if task.connectionState == .connected {
-                tick &+= 1
-            }
         }
     }
 }
@@ -430,17 +430,24 @@ import Combine
 @available(macOS 13, *)
 struct ConnectionInspectorView: View {
     @ObservedObject var task: NetworkTaskEntity
+    @State private var tick: UInt = 0
     @Environment(\.store) private var store
 
     var body: some View {
+        let _ = tick
         VStack(spacing: 0) {
             toolbar
             Divider()
             ConnectionTimingViewMac(task: task)
             Divider()
             RichTextView(viewModel: makeSummaryViewModel())
-           
-            
+
+
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if task.connectionState == .connected {
+                tick &+= 1
+            }
         }
     }
 
@@ -471,17 +478,10 @@ struct ConnectionInspectorView: View {
 @available(macOS 13, *)
 private struct ConnectionTimingViewMac: View {
     @ObservedObject var task: NetworkTaskEntity
-    @State private var tick: UInt = 0
 
     var body: some View {
-        let _ = tick
         TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
             .padding()
-            .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-                if task.connectionState == .connected {
-                    tick &+= 1
-                }
-            }
     }
 }
 
