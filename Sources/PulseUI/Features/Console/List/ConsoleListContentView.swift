@@ -54,10 +54,8 @@ struct ConsoleListContentView: View {
                 let objectID = entity.objectID
                 ConsoleEntityCell(entity: entity)
                     .id(objectID)
-#if os(iOS) || os(visionOS)
                     .onAppear { viewModel.onAppearCell(with: objectID) }
                     .onDisappear { viewModel.onDisappearCell(with: objectID) }
-#endif
             }
         }
 #if os(macOS)
