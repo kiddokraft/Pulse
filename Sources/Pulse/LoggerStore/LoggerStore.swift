@@ -478,6 +478,7 @@ extension LoggerStore {
 
         entity.originalRequest.map(backgroundContext.delete)
         entity.currentRequest.map(backgroundContext.delete)
+        entity.response.map(backgroundContext.delete)
 
         entity.originalRequest = makeRequest(for: event.originalRequest)
         entity.currentRequest = currentRequest.map(makeRequest)

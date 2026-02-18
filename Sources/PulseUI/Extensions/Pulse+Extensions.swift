@@ -229,10 +229,16 @@ extension NetworkTaskEntity {
         return start
     }
 
-    /// Returns the effective duration for display - uses connectionDuration for connections, otherwise task.duration
+    /// Returns the effective duration for display - uses connectionDuration for connections, otherwise task.duration.
+    /// For active connections without a stored duration, calculates elapsed time from createdAt.
     var effectiveDuration: TimeInterval {
-        if isConnection, let connDuration = connectionDuration {
-            return connDuration
+        if isConnection {
+            if let connDuration = connectionDuration {
+                return connDuration
+            }
+            if connectionState == .connected {
+                return max(0, Date().timeIntervalSince(createdAt))
+            }
         }
         return duration
     }

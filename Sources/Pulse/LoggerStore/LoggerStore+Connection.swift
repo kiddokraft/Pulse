@@ -152,20 +152,27 @@ extension LoggerStore {
 
         // Store timing info (timestamps are in milliseconds from sing-box)
         responseHeaders["Connection-Start"] = String(connection.createdAt)
-        if connection.closedAt > 0 {
-            // Calculate duration in seconds (timestamps are milliseconds)
+        let isComplete = connection.closedAt > 0
+        if isComplete {
+            // Closed connection: calculate final duration
             let durationMs = connection.closedAt - connection.createdAt
+            let durationSeconds = Double(durationMs) / 1000.0
+            responseHeaders["Connection-Duration"] = String(format: "%.3f", durationSeconds)
+        } else if connection.createdAt > 0 {
+            // Active connection: calculate elapsed duration from creation to now
+            let nowMs = Int64(Date().timeIntervalSince1970 * 1000)
+            let durationMs = nowMs - connection.createdAt
             let durationSeconds = Double(durationMs) / 1000.0
             responseHeaders["Connection-Duration"] = String(format: "%.3f", durationSeconds)
         }
 
-        let isComplete = connection.closedAt > 0
-        let response = HTTPURLResponse(
-            url: url,
-            statusCode: isComplete ? 200 : 102,  // 102 = Processing (pending), 200 = Complete
-            httpVersion: "HTTP/1.1",
-            headerFields: responseHeaders
+        // Build NetworkLogger.Response directly instead of going through HTTPURLResponse,
+        // which can return nil for non-HTTP URL schemes (tcp://, udp://).
+        var networkResponse = NetworkLogger.Response(
+            URLResponse(url: url, mimeType: nil, expectedContentLength: -1, textEncodingName: nil)
         )
+        networkResponse.statusCode = isComplete ? 200 : 102  // 102 = Processing (active), 200 = Complete
+        networkResponse.headers = responseHeaders
 
         // Build descriptive task description
         let taskDescription = buildTaskDescription(from: connection)
@@ -178,7 +185,7 @@ extension LoggerStore {
             createdAt: Date(timeIntervalSince1970: Double(connection.createdAt) / 1000.0),
             originalRequest: NetworkLogger.Request(request),
             currentRequest: NetworkLogger.Request(request),
-            response: response.map(NetworkLogger.Response.init),
+            response: networkResponse,
             error: nil,
             requestBody: nil,
             responseBody: nil,

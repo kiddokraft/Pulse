@@ -146,9 +146,10 @@ struct ConsoleTaskCell: View {
         text = text + Text("    ") +
         makeInfoText("arrow.up", upload) + Text("    ") +
         makeInfoText("arrow.down", download)
-        if task.duration > 0 {
+        let connDuration = task.effectiveDuration
+        if connDuration > 0 {
             text = text + Text("     ") +
-            makeInfoText("clock", ConsoleFormatter.duration(for: task) ?? "–")
+            makeInfoText("clock", DurationFormatter.string(from: connDuration))
         }
         return text
     }
