@@ -97,12 +97,8 @@ struct ShareStoreView: View {
         }
         Section {
             Picker("Output", selection: $viewModel.output) {
-                Text("Pulse").tag(ShareStoreOutput.store)
                 Text("Plain Text").tag(ShareStoreOutput.text)
-                Text("HTML").tag(ShareStoreOutput.html)
                 Text("HAR").tag(ShareStoreOutput.har)
-                Divider()
-                Text("Pulse (Package)").tag(ShareStoreOutput.package)
             }
 #if os(macOS)
             .labelsHidden()

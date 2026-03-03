@@ -22,9 +22,9 @@ public final class UserSettings: ObservableObject {
     @AppStorage("com.github.kean.pulse.link.detection")
     public var isLinkDetectionEnabled = false
 
-    /// The default sharing output type. By default, ``ShareStoreOutput/store``.
+    /// The default sharing output type. By default, ``ShareStoreOutput/text``.
     @AppStorage("com.github.kean.pulse.sharing.output")
-    public var sharingOutput: ShareStoreOutput = .store
+    public var sharingOutput: ShareStoreOutput = .text
 
     /// HTTP headers to display in a Console. By default, empty.
     public var displayHeaders: [String] {

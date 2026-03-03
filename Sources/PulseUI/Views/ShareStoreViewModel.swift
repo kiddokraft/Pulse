@@ -23,6 +23,7 @@ import Combine
 
     init() {
         output = UserSettings.shared.sharingOutput
+        sanitizeOutput()
     }
 
     func buttonSharedTapped() {
@@ -33,7 +34,17 @@ import Combine
     }
 
     private func saveSharingOptions() {
+        sanitizeOutput()
         UserSettings.shared.sharingOutput = output
+    }
+
+    private func sanitizeOutput() {
+        switch output {
+        case .text, .har:
+            break
+        default:
+            output = .text
+        }
     }
 
     func prepareForSharing() {
@@ -83,25 +94,17 @@ import Combine
     }
 
     private func prepareForSharing(store: LoggerStore, options: LoggerStore.ExportOptions) async throws -> ShareItems {
+        sanitizeOutput()
         switch output {
         case .store:
-            return try await prepareStoreForSharing(store: store, as: .archive, options: options)
+            return try await prepareForSharing(store: store, output: .plainText, options: options)
         case .package:
-            return try await prepareStoreForSharing(store: store, as: .package, options: options)
+            return try await prepareForSharing(store: store, output: .plainText, options: options)
         case .text, .html:
-            let output: ShareOutput = output == .text ? .plainText : .html
-            return try await prepareForSharing(store: store, output: output, options: options)
+            return try await prepareForSharing(store: store, output: .plainText, options: options)
         case .har:
             return try await prepareForSharing(store: store, output: .har, options: options)
         }
-    }
-
-    private func prepareStoreForSharing(store: LoggerStore, as docType: LoggerStore.DocumentType, options: LoggerStore.ExportOptions) async throws -> ShareItems {
-        let directory = TemporaryDirectory()
-
-        let logsURL = directory.url.appendingPathComponent("logs-\(makeCurrentDate()).\(output.fileExtension)")
-        try await store.export(to: logsURL, as: docType, options: options)
-        return ShareItems([logsURL], cleanup: directory.remove)
     }
 
     private func prepareForSharing(store: LoggerStore, output: ShareOutput, options: LoggerStore.ExportOptions) async throws -> ShareItems {

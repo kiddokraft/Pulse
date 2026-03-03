@@ -31,7 +31,7 @@ public struct SettingsView: View {
             }
             Section(header: Text("Appearance")) {
                 Stepper("Line Limit: \(settings.lineLimit)", value: $settings.lineLimit, in: 1...20)
-                Toggle("Link Detection", isOn: $settings.isLinkDetectionEnabled)  .tint(Color.accentColor)
+                Toggle("Link Detection", isOn: $settings.isLinkDetectionEnabled).toggleAccentTintCompat()
             }
             Section(header: Text("List headers"), footer: Text("These headers will be included in the list view")) {
                 ForEach(settings.displayHeaders, id: \.self) {

@@ -139,13 +139,13 @@ extension ConsoleFiltersView {
         }, content: {
 #if os(macOS)
             HStack {
-                Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive)  .tint(Color.accentColor)
+                Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive).toggleAccentTintCompat()
                 Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete)
                 Spacer()
             }
 #else
-            Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive)  .tint(Color.accentColor)
-            Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete)  .tint(Color.accentColor)
+            Toggle("Active", isOn: $viewModel.criteria.network.connectionState.showActive).toggleAccentTintCompat()
+            Toggle("Complete", isOn: $viewModel.criteria.network.connectionState.showComplete).toggleAccentTintCompat()
 #endif
         })
     }

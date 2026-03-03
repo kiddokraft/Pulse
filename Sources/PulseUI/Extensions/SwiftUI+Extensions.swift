@@ -23,6 +23,27 @@ extension View {
     func invisible() -> some View {
         self.hidden().accessibilityHidden(true)
     }
+
+    @ViewBuilder
+    func toggleAccentTintCompat() -> some View {
+#if os(iOS)
+        if #available(iOS 16, *) {
+            self.tint(Color.accentColor)
+        } else {
+            self.toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
+        }
+#elseif os(tvOS)
+        if #available(tvOS 16, *) {
+            self.tint(Color.accentColor)
+        } else {
+            self.toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
+        }
+#elseif os(visionOS)
+        self.tint(Color.accentColor)
+#else
+        self.tint(Color.accentColor)
+#endif
+    }
 }
 
 extension ContentSizeCategory {
