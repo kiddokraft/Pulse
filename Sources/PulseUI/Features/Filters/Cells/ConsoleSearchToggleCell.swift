@@ -12,11 +12,11 @@ struct ConsoleSearchToggleCell: View {
     var body: some View {
 #if os(macOS)
         HStack {
-            Toggle(title, isOn: $isOn)
+            Toggle(title, isOn: $isOn)  .tint(Color.accentColor)
             Spacer()
         }
 #else
-        Toggle(title, isOn: $isOn)
+        Toggle(title, isOn: $isOn)  .tint(Color.accentColor)
 #endif
     }
 }

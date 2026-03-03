@@ -51,10 +51,10 @@ private struct ConsoleMenuView: View {
         Section {
             Toggle(isOn: $viewModel.options.isOnlyErrors) {
                 Label("Errors Only", systemImage: "exclamationmark.octagon")
-            }
+            }  .tint(Color.accentColor)
             Toggle(isOn: environment.bindingForNetworkMode) {
                 Label("Network Only", systemImage: "arrow.down.circle")
-            }
+            }  .tint(Color.accentColor)
             NavigationLink(destination: destinationFilters) {
                 Label(environment.bindingForNetworkMode.wrappedValue ? "Network Filters" : "Message Filters", systemImage: "line.3.horizontal.decrease.circle")
             }

@@ -60,7 +60,7 @@ struct RemoteLoggerSettingsView: View {
                 }
 #endif
             }
-        })
+        })  .tint(Color.accentColor)
 #if os(macOS)
         .toggleStyle(.switch)
 #endif

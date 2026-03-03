@@ -52,7 +52,7 @@ struct ConsoleSearchLogLevelsCell: View {
         VStack(alignment: .leading) {
             Spacer()
             ForEach(levels, id: \.self) { level in
-                Toggle(level.name.uppercased(), isOn: binding(forLevel: level))
+                Toggle(level.name.uppercased(), isOn: binding(forLevel: level))  .tint(Color.accentColor)
             }
         }
     }
