@@ -354,7 +354,7 @@ private struct ConnectionTrafficView: View {
                        let rate = task.connectionUploadRate {
                         Text(rate)
                             .font(.caption)
-                            .foregroundColor(.red)
+                            .foregroundColor(Color(red: 0.620, green: 0.224, blue: 0.000))
                             .monospacedDigit()
                     }
                 }
@@ -374,7 +374,7 @@ private struct ConnectionTrafficView: View {
                        let rate = task.connectionDownloadRate {
                         Text(rate)
                             .font(.caption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(Color(red: 1.000, green: 0.541, blue: 0.000))
                             .monospacedDigit()
                     }
                 }
@@ -510,7 +510,7 @@ enum ConnectionTimingBuilder {
         rows.append(TimingRowViewModel(
             title: "Upload",
             value: uploadStr,
-            color: .systemRed,
+            color: UXColor(red: 0.620, green: 0.224, blue: 0.000, alpha: 1.0),
             start: 0.0,
             length: max(0.02, uploadFraction)
         ))
@@ -526,7 +526,7 @@ enum ConnectionTimingBuilder {
         rows.append(TimingRowViewModel(
             title: "Download",
             value: downloadStr,
-            color: .systemOrange,
+            color: UXColor(red: 1.000, green: 0.541, blue: 0.000, alpha: 1.0),
             start: totalBytes > 0 ? uploadFraction : 0.5,
             length: max(0.02, downloadFraction)
         ))
