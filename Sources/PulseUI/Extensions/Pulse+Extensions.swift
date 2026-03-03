@@ -93,7 +93,7 @@ extension NetworkTaskEntity {
         var tintColor: Color {
             switch self {
             case .connected: return .orange
-            case .complete: return Color(red: 0.620, green: 0.224, blue: 0.000)
+            case .complete: return .gray
             }
         }
 
