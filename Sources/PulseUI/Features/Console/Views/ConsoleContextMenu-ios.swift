@@ -26,38 +26,15 @@ struct ConsoleContextMenu: View {
                 ConsoleGroupByMenu()
             }
             Section {
-                Button(action: { router.isShowingSettings = true }) {
-                    Label("Settings", systemImage: "gear")
-                }
                 if !environment.store.isArchive {
                     Button(role: .destructive, action: environment.removeAllLogs) {
                         Label("Remove Logs", systemImage: "trash")
                     }
                 }
             }
-            Section {
-                if !UserDefaults.standard.bool(forKey: "pulse-disable-support-prompts") {
-                    Button(action: buttonGetPulseProTapped) {
-                        Label("Get Pulse Pro", systemImage: "link")
-                    }
-                }
-                Button(action: buttonSendFeedbackTapped) {
-                    Label("Report Issue", systemImage: "envelope")
-                }
-            }
         } label: {
             Image(systemName: "ellipsis")
         }
-    }
-
-    private func buttonGetPulseProTapped() {
-        guard let url = URL(string: "https://pulselogger.com") else { return }
-        UIApplication.shared.open(url)
-    }
-
-    private func buttonSendFeedbackTapped() {
-        guard let url = URL(string: "https://github.com/kean/Pulse/issues") else { return }
-        UIApplication.shared.open(url)
     }
 }
 
