@@ -66,7 +66,8 @@ extension ConsoleFilers {
     struct LogLevels: ConsoleFilterProtocol {
         var isEnabled = true
         var levels: Set<LoggerStore.Level> = Set(LoggerStore.Level.allCases)
-            .subtracting([LoggerStore.Level.trace])
+            .subtracting([LoggerStore.Level.trace, LoggerStore.Level.debug])
+         
     }
 
     struct Labels: ConsoleFilterProtocol {
