@@ -50,33 +50,33 @@ private struct ConsoleMainView: View {
     private var contentView: some View {
         ConsoleListView()
             .frame(minWidth: 300, idealWidth: 600, minHeight: 120, idealHeight: 480)
-            .toolbar {
-                ToolbarItemGroup(placement: .automatic) {
-                    contentToolbarNavigationItems
-                }
-                ToolbarItemGroup(placement: .automatic) {
-                    Button(action: { isShowingFilters = true }) {
-                        Label("Filter", systemImage: "line.3.horizontal.decrease")
-                    }
-                    .popover(isPresented: $isShowingFilters) {
-                        ConsoleFiltersView()
-                            
-                            .frame(width: 500, height: 650)
-                    }
-//                    Button(action: { isShowingSessions = true }) {
-//                        Label("Show Sessions", systemImage: "tray.full")
+//            .toolbar {
+//                ToolbarItemGroup(placement: .automatic) {
+//                    contentToolbarNavigationItems
+//                }
+//                ToolbarItemGroup(placement: .automatic) {
+//                    Button(action: { isShowingFilters = true }) {
+//                        Label("Filter", systemImage: "line.3.horizontal.decrease")
 //                    }
-//                    .popover(isPresented: $isShowingSessions) {
-//                        SessionsView().frame(width: 300, height: 420)
+//                    .popover(isPresented: $isShowingFilters) {
+//                        ConsoleFiltersView()
+//                            
+//                            .frame(width: 500, height: 650)
 //                    }
-//                    Button(action: { isShowingSettings = true }) {
-//                        Label("More", systemImage: "ellipsis")
-//                    }
-//                    .popover(isPresented: $isShowingSettings) {
-//                        SettingsView().frame(width: 300, height: 210)
-//                    }
-                }
-            }
+////                    Button(action: { isShowingSessions = true }) {
+////                        Label("Show Sessions", systemImage: "tray.full")
+////                    }
+////                    .popover(isPresented: $isShowingSessions) {
+////                        SessionsView().frame(width: 300, height: 420)
+////                    }
+////                    Button(action: { isShowingSettings = true }) {
+////                        Label("More", systemImage: "ellipsis")
+////                    }
+////                    .popover(isPresented: $isShowingSettings) {
+////                        SettingsView().frame(width: 300, height: 210)
+////                    }
+//                }
+//            }
     }
 
     private var detailsView: some View {

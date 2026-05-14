@@ -52,13 +52,13 @@ private struct _InternalConsoleListView: View {
         if #available(iOS 16, *) {
             _ConsoleListView()
                 .environment(\.defaultMinListRowHeight, 8)
-                .searchable(text: $searchBarViewModel.text, tokens: $searchBarViewModel.tokens, token: {
-                    if let image = $0.systemImage {
-                        Label($0.title, systemImage: image)
-                    } else {
-                        Text($0.title)
-                    }
-                })
+//                .searchable(text: $searchBarViewModel.text, tokens: $searchBarViewModel.tokens, token: {
+//                    if let image = $0.systemImage {
+//                        Label($0.title, systemImage: image)
+//                    } else {
+//                        Text($0.title)
+//                    }
+//                })
 #if os(macOS)
                 .searchSuggestions {
                     ConsoleSearchSuggestionsView()
