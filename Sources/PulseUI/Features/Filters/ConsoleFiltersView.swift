@@ -10,9 +10,20 @@ import Combine
 struct ConsoleFiltersView: View {
     @EnvironmentObject var environment: ConsoleEnvironment // important: reloads mode
     @EnvironmentObject var viewModel: ConsoleFiltersViewModel
+#if os(tvOS)
+    @Environment(\.dismiss) private var dismiss
+    private let onBack: (() -> Void)?
+    @Namespace private var focusNamespace
+
+    init(onBack: (() -> Void)? = nil) {
+        self.onBack = onBack
+    }
+#endif
 
     var body: some View {
-#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
+#if os(tvOS)
+        filtersList
+#elseif os(iOS) || os(watchOS) || os(visionOS)
         Form {
             form
         }
@@ -45,6 +56,50 @@ struct ConsoleFiltersView: View {
         
 #endif
     }
+
+#if os(tvOS)
+    @ViewBuilder
+    private var filtersList: some View {
+        if #available(tvOS 17, *) {
+            List {
+                Button("Back", action: goBack)
+                filterTitle
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                form
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+            .contentMargins(.top, 40, for: .scrollContent)
+            .focusScope(focusNamespace)
+        } else {
+            List {
+                Button("Back", action: goBack)
+                    .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
+                filterTitle
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                form
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+            .focusScope(focusNamespace)
+        }
+    }
+
+    private var filterTitle: some View {
+        Button(action: {}) {
+            Text(environment.mode == .network || environment.mode == .connection ? "Network Filters" : "Message Filters")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func goBack() {
+        if let onBack {
+            onBack()
+        } else {
+            dismiss()
+        }
+    }
+#endif
 
     @ViewBuilder
     private var form: some View {

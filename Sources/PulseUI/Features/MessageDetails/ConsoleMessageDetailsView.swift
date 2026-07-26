@@ -45,21 +45,103 @@ struct ConsoleMessageDetailsView: View {
     @Environment(\.router) private var router
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button("Back", action: goBack)
-                Text("Log Details")
-                    .font(.headline)
-                Spacer()
-                NavigationLink(destination: ConsoleMessageMetadataView(message: message)) {
-                    Text("Details")
+        detailsList
+    }
+
+    @ViewBuilder
+    private var detailsList: some View {
+        if #available(tvOS 17, *) {
+            List {
+                backButton
+                titleHeader
+                details
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+            .contentMargins(.top, 40, for: .scrollContent)
+        } else {
+            List {
+                backButton
+                    .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
+                titleHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                details
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+        }
+    }
+
+    private var backButton: some View {
+        Button("Back", action: goBack)
+    }
+
+    private var titleHeader: some View {
+        Button(action: {}) {
+            Text("Log Details")
+                .font(.headline)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private var details: some View {
+        Section {
+            sectionRow("Message")
+            Button(action: {}) {
+                Text(message.text)
+                    .font(.body.monospaced())
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+
+        Section {
+            sectionRow("Summary")
+            detailRow("Date", value: DateFormatter.fullDateFormatter.string(from: message.createdAt))
+            detailRow("Level", value: LoggerStore.Level(rawValue: message.level)?.name)
+            detailRow("Label", value: message.label.isEmpty ? nil : message.label)
+        }
+
+        Section {
+            sectionRow("Details")
+            detailRow("File", value: message.file.isEmpty ? nil : message.file)
+            detailRow("Function", value: message.function.isEmpty ? nil : message.function)
+            detailRow("Line", value: message.line == 0 ? nil : "\(message.line)")
+        }
+
+        if !message.metadata.isEmpty {
+            Section {
+                sectionRow("Metadata")
+                ForEach(message.metadata.sorted(by: { $0.key < $1.key }), id: \.key) { item in
+                    detailRow(item.key, value: item.value)
                 }
             }
-            .padding(.horizontal, 40)
-            .padding(.vertical, 12)
+        }
+    }
 
-            Divider()
-            contents
+    private func sectionRow(_ title: String) -> some View {
+        Button(action: {}) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private func detailRow(_ title: String, value: String?) -> some View {
+        if let value, !value.isEmpty {
+            Button(action: {}) {
+                HStack {
+                    Text(title)
+                    Spacer()
+                    Text(value)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
         }
     }
 

@@ -86,6 +86,9 @@ struct ConsoleTaskCell: View {
             .font(ConsoleConstants.fontInfo)
             .foregroundColor(.secondary)
             .monospacedDigit()
+#if os(tvOS)
+            .padding(.trailing, 16)
+#endif
     }
 
     private var message: some View {
@@ -156,11 +159,11 @@ struct ConsoleTaskCell: View {
 
     @ViewBuilder
     private var connectionStatusLabel: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: connectionStatusSpacing) {
             Circle()
                 .fill(task.connectionState.tintColor)
-                .frame(width: 8, height: 8)
-            #if os(iOS)
+                .frame(width: connectionStatusDotSize, height: connectionStatusDotSize)
+            #if os(iOS) || os(tvOS)
             Text(task.connectionState.title)
                 .font(ConsoleConstants.fontTitle)
                 .fontWeight(.medium)
@@ -168,6 +171,22 @@ struct ConsoleTaskCell: View {
                 .lineLimit(1)
             #endif
         }
+    }
+
+    private var connectionStatusDotSize: CGFloat {
+#if os(tvOS)
+        14
+#else
+        8
+#endif
+    }
+
+    private var connectionStatusSpacing: CGFloat {
+#if os(tvOS)
+        8
+#else
+        4
+#endif
     }
 
     private func makeInfoText(_ image: String, _ text: String) -> Text {

@@ -573,14 +573,18 @@ struct ConnectionInspectorView: View {
     private var connectionList: some View {
         if #available(tvOS 17, *) {
             List {
-                detailHeader
+                backButton
+                domainHeader
                 ConnectionTimingViewTV(task: task)
                 details
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
+            .contentMargins(.top, 40, for: .scrollContent)
         } else {
             List {
-                detailHeader
+                backButton
+                    .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
+                domainHeader
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 ConnectionTimingViewTV(task: task)
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
@@ -590,18 +594,22 @@ struct ConnectionInspectorView: View {
         }
     }
 
-    private var detailHeader: some View {
-        HStack {
-            Button("Back", action: goBack)
-            Spacer()
+    private var backButton: some View {
+        Button("Back", action: goBack)
+    }
+
+    private var domainHeader: some View {
+        Button(action: {}) {
             Text(task.connectionDomain ?? task.host ?? "Connection")
                 .font(.headline)
                 .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     @ViewBuilder private var details: some View {
-        Section("Connection") {
+        Section {
+            sectionRow("Connection")
             detailRow("Status", value: task.connectionState.title, color: task.connectionState.tintColor)
             detailRow("Network", value: task.httpMethod?.uppercased())
             detailRow("Domain", value: task.connectionDomain ?? task.host)
@@ -613,18 +621,29 @@ struct ConnectionInspectorView: View {
             detailRow("User", value: task.connectionUser)
         }
 
-        Section("Routing") {
+        Section {
+            sectionRow("Routing")
             detailRow("Rule", value: task.connectionRule)
             detailRow("Outbound", value: task.connectionOutbound)
             detailRow("Chain", value: task.connectionChain)
         }
 
-        Section("Traffic") {
+        Section {
+            sectionRow("Traffic")
             detailRow("Upload", value: trafficValue(total: task.connectionUpload, rate: task.connectionUploadRate))
             detailRow("Download", value: trafficValue(total: task.connectionDownload, rate: task.connectionDownloadRate))
             if task.connectionState != .connected, task.effectiveDuration > 0 {
                 detailRow("Duration", value: DurationFormatter.string(from: task.effectiveDuration))
             }
+        }
+    }
+
+    private func sectionRow(_ title: String) -> some View {
+        Button(action: {}) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -663,7 +682,10 @@ private struct ConnectionTimingViewTV: View {
     @ObservedObject var task: NetworkTaskEntity
 
     var body: some View {
-        TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+        TimingView(
+            viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task),
+            barHeightScale: 2
+        )
     }
 }
 

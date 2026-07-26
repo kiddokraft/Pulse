@@ -27,6 +27,18 @@ struct ConsoleSection<Header: View, Content: View>: View {
                     .padding(.horizontal, 12)
             }
         })
+#elseif os(tvOS)
+        Section {
+            Button(action: {}) {
+                HStack {
+                    header()
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            }
+            content()
+        }
 #else
         Section(content: content, header: header)
 #endif

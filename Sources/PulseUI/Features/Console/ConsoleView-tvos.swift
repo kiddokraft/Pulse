@@ -14,6 +14,7 @@ public struct ConsoleView: View {
     @StateObject private var listViewModel: ConsoleListViewModel
     @StateObject private var searchBarViewModel: ConsoleSearchBarViewModel
     @StateObject private var searchViewModel: ConsoleSearchViewModel
+    @State private var isFilterPresented = false
 
     init(environment: ConsoleEnvironment) {
         let listViewModel = ConsoleListViewModel(environment: environment, filters: environment.filters)
@@ -43,6 +44,11 @@ public struct ConsoleView: View {
         .onChange(of: searchBarViewModel.text) { text in
             searchViewModel.isSearchActive = !text.trimmingCharacters(in: .whitespaces).isEmpty
         }
+        .onReceive(environment.router.$selectedObjectID) { objectID in
+            if objectID != nil {
+                isFilterPresented = false
+            }
+        }
         .injecting(environment)
         .environmentObject(listViewModel)
     }
@@ -54,7 +60,12 @@ public struct ConsoleView: View {
 
             Divider()
 
-            ConsoleDetailsView()
+            ConsoleDetailsView(
+                isFilterPresented: isFilterPresented,
+                dismissFilter: dismissConsoleSettings,
+                searchText: $searchBarViewModel.text,
+                onSubmitSearch: searchViewModel.onSubmitSearch
+            )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
@@ -67,18 +78,12 @@ public struct ConsoleView: View {
     private var consoleList: some View {
         if #available(tvOS 17, *) {
             List {
-                searchHeader
-                modePicker
                 filterLink
                 consoleListContent
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
         } else {
             List {
-                searchHeader
-                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
-                modePicker
-                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 filterLink
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 consoleListContent
@@ -87,32 +92,18 @@ public struct ConsoleView: View {
         }
     }
 
-    private var searchHeader: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            TextField("Search", text: $searchBarViewModel.text)
-                .onSubmit(searchViewModel.onSubmitSearch)
-        }
-    }
-
-    private var modePicker: some View {
-        Picker("View", selection: modeSelection) {
-            Text("Connection").tag(ConsoleMode.connection)
-            Text("Logs").tag(ConsoleMode.logs)
-            Text("All").tag(ConsoleMode.all)
-        }
-        .labelsHidden()
-        .pickerStyle(.segmented)
-    }
-
     private var filterLink: some View {
-        NavigationLink(destination:
-            ConsoleMenuScreen(filters: environment.filters)
-                .injecting(environment)
-        ) {
-            Text("Filter")
+        Button {
+            environment.router.selectedObjectID = nil
+            isFilterPresented = true
+        } label: {
+            Text("Console")
+                .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
         }
+    }
+
+    private func dismissConsoleSettings() {
+        isFilterPresented = false
     }
 
     @ViewBuilder
@@ -130,25 +121,29 @@ public struct ConsoleView: View {
         }
     }
 
-    private var modeSelection: Binding<ConsoleMode> {
-        Binding(
-            get: { environment.mode },
-            set: { mode in
-                environment.router.selectedObjectID = nil
-                environment.mode = mode
-            }
-        )
-    }
 }
 
 private struct ConsoleDetailsView: View {
+    let isFilterPresented: Bool
+    let dismissFilter: () -> Void
+    @Binding var searchText: String
+    let onSubmitSearch: () -> Void
+
     @EnvironmentObject private var router: ConsoleRouter
     @EnvironmentObject private var environment: ConsoleEnvironment
     @Environment(\.store) private var store
 
     @ViewBuilder
     var body: some View {
-        if let objectID = router.selectedObjectID,
+        if isFilterPresented {
+            ConsoleMenuScreen(
+                filters: environment.filters,
+                onBack: dismissFilter,
+                searchText: $searchText,
+                onSubmitSearch: onSubmitSearch
+            )
+            .injecting(environment)
+        } else if let objectID = router.selectedObjectID,
            let entity = try? store.viewContext.existingObject(with: objectID) {
             switch LoggerEntity(entity) {
             case .message(let message):
@@ -161,7 +156,7 @@ private struct ConsoleDetailsView: View {
                 }
             }
         } else {
-            Text("Select an item")
+            Text("Choose a log or connection to view details")
                 .foregroundColor(.secondary)
         }
     }
@@ -178,100 +173,161 @@ private struct ConsoleDetailsView: View {
     }
 }
 
+private enum ConsoleMenuDestination {
+    case filters
+    case storeDetails
+}
+
 private struct ConsoleMenuScreen: View {
     @ObservedObject var filters: ConsoleFiltersViewModel
-    @Environment(\.dismiss) private var dismiss
+    let onBack: () -> Void
+    @Binding var searchText: String
+    let onSubmitSearch: () -> Void
+    @State private var path: [ConsoleMenuDestination] = []
+    @Environment(\.store) private var store
+    @Namespace private var focusNamespace
 
+    @ViewBuilder
     var body: some View {
-        menu
-            .environmentObject(filters)
-            .navigationTitle("Console Settings")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Back", action: dismiss.callAsFunction)
-                }
+        ZStack {
+            menu
+                .environmentObject(filters)
+                .opacity(path.isEmpty ? 1 : 0)
+                .disabled(!path.isEmpty)
+
+            if path.last == .filters {
+                ConsoleFiltersView(onBack: goBack)
+                    .environmentObject(filters)
+            } else if path.last == .storeDetails {
+                StoreDetailsView(source: .store(store), onBack: goBack)
             }
+        }
     }
 
     @ViewBuilder
     private var menu: some View {
-        Form {
-            ConsoleMenuView()
+        if #available(tvOS 17, *) {
+            List {
+                backButton
+                titleHeader
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                ConsoleMenuView(
+                    searchText: $searchText,
+                    onSubmitSearch: onSubmitSearch,
+                    showFilters: { show(.filters) },
+                    showStoreDetails: { show(.storeDetails) }
+                )
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+            .contentMargins(.top, 40, for: .scrollContent)
+            .focusScope(focusNamespace)
+        } else {
+            List {
+                backButton
+                    .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
+                titleHeader
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                ConsoleMenuView(
+                    searchText: $searchText,
+                    onSubmitSearch: onSubmitSearch,
+                    showFilters: { show(.filters) },
+                    showStoreDetails: { show(.storeDetails) }
+                )
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+            .focusScope(focusNamespace)
+        }
+    }
+
+    private var backButton: some View {
+        Button("Back", action: onBack)
+    }
+
+    private var titleHeader: some View {
+        Button(action: {}) {
+            Text("Console")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func show(_ destination: ConsoleMenuDestination) {
+        path.append(destination)
+    }
+
+    private func goBack() {
+        guard path.popLast() != nil else {
+            onBack()
+            return
         }
     }
 }
 
 private struct ConsoleMenuView: View {
+    @Binding var searchText: String
+    let onSubmitSearch: () -> Void
+    let showFilters: () -> Void
+    let showStoreDetails: () -> Void
+
     @EnvironmentObject private var viewModel: ConsoleFiltersViewModel
     @EnvironmentObject private var environment: ConsoleEnvironment
     @Environment(\.store) private var store
 
     var body: some View {
         Section {
-            Toggle(isOn: $viewModel.options.isOnlyErrors) {
-                Label("Errors Only", systemImage: "exclamationmark.octagon")
-            }.toggleAccentTintCompat()
-            Toggle(isOn: environment.bindingForNetworkMode) {
-                Label("Network Only", systemImage: "arrow.down.circle")
-            }.toggleAccentTintCompat()
-            NavigationLink(destination: destinationFilters) {
-                Label(environment.bindingForNetworkMode.wrappedValue ? "Network Filters" : "Message Filters", systemImage: "line.3.horizontal.decrease.circle")
+            sectionRow("Quick Filters")
+            TextField("Search", text: $searchText)
+                .onSubmit(onSubmitSearch)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+            Picker("Content", selection: modeSelection) {
+                Text("Connection").tag(ConsoleMode.connection)
+                Text("Logs").tag(ConsoleMode.logs)
+                Text("All").tag(ConsoleMode.all)
             }
-        } header: { Text("Quick Filters") }
+            Toggle(isOn: $viewModel.options.isOnlyErrors) {
+                Text("Errors Only")
+            }.toggleAccentTintCompat()
+            Button(action: showFilters) {
+                Text(environment.mode == .connection ? "Network Filters" : "Message Filters")
+            }
+        }
         if !(store.options.contains(.readonly)) {
             Section {
-                NavigationLink(destination: destinationStoreDetails) {
-                    Label("Store Info", systemImage: "info.circle")
+                sectionRow("Store")
+                Button(action: showStoreDetails) {
+                    Text("Store Info")
                 }
                 Button(role: .destructive, action: {
                     environment.index.clear()
                     store.removeAll()
                 }, label: {
-                    Label("Remove Logs", systemImage: "trash")
+                    Text("Remove Logs")
                 })
-            } header: { Text("Store") }
-        }
-        Section {
-            NavigationLink(destination: destinationSettings) {
-                Label("Settings", systemImage: "gear")
-            }
-        } header: { Text("Settings") }
-    }
-
-    private var destinationSettings: some View {
-        SettingsView(store: store)
-            .consoleBackButton()
-    }
-
-    private var destinationStoreDetails: some View {
-        StoreDetailsView(source: .store(store))
-            .consoleBackButton()
-    }
-
-    private var destinationFilters: some View {
-        ConsoleFiltersView()
-            .consoleBackButton()
-            .injecting(environment)
-            .environmentObject(viewModel)
-    }
-}
-
-private extension View {
-    func consoleBackButton() -> some View {
-        modifier(ConsoleBackButtonModifier())
-    }
-}
-
-private struct ConsoleBackButtonModifier: ViewModifier {
-    @Environment(\.dismiss) private var dismiss
-
-    func body(content: Content) -> some View {
-        content.toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Back", action: dismiss.callAsFunction)
             }
         }
     }
+
+    private func sectionRow(_ title: String) -> some View {
+        Button(action: {}) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var modeSelection: Binding<ConsoleMode> {
+        Binding(
+            get: { environment.mode },
+            set: { mode in
+                environment.router.selectedObjectID = nil
+                environment.mode = mode
+            }
+        )
+    }
+
 }
 
 #if DEBUG

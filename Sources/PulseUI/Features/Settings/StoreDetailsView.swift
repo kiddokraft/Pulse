@@ -9,6 +9,14 @@ struct StoreDetailsView: View {
     @StateObject private var viewModel = StoreDetailsViewModel()
 
     let source: Source
+#if os(tvOS)
+    private let onBack: (() -> Void)?
+
+    init(source: Source, onBack: (() -> Void)? = nil) {
+        self.source = source
+        self.onBack = onBack
+    }
+#endif
 
     enum Source {
         /// Loads the info when the view appears on screen.
@@ -20,15 +28,115 @@ struct StoreDetailsView: View {
     }
 
     var body: some View {
+#if os(tvOS)
+        StoreDetailsTVView(viewModel: viewModel, onBack: onBack)
+            .onAppear { viewModel.load(from: source) }
+#else
         StoreDetailsContentsView(viewModel: viewModel)
             .onAppear { viewModel.load(from: source) }
-#if os(tvOS)
-            .padding()
-#else
             .inlineNavigationTitle("Store Details")
 #endif
     }
 }
+
+#if os(tvOS)
+private struct StoreDetailsTVView: View {
+    @ObservedObject var viewModel: StoreDetailsViewModel
+    let onBack: (() -> Void)?
+    @Environment(\.dismiss) private var dismiss
+    @Namespace private var focusNamespace
+
+    var body: some View {
+        detailsList
+    }
+
+    @ViewBuilder
+    private var detailsList: some View {
+        if #available(tvOS 17, *) {
+            List {
+                backButton
+                titleHeader
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                details
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+            .contentMargins(.top, 40, for: .scrollContent)
+            .focusScope(focusNamespace)
+        } else {
+            List {
+                backButton
+                    .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
+                titleHeader
+                    .prefersDefaultFocus(true, in: focusNamespace)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                details
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+            .focusScope(focusNamespace)
+        }
+    }
+
+    private var backButton: some View {
+        Button("Back", action: goBack)
+    }
+
+    private var titleHeader: some View {
+        Button(action: {}) {
+            Text("Store Details")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private var details: some View {
+        if let error = viewModel.errorMessage {
+            Button(action: {}) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Failed to load info")
+                    Text(error)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else {
+            if #available(tvOS 16, *), let info = viewModel.info {
+                LoggerStoreSizeChart(info: info, sizeLimit: viewModel.storeSizeLimit)
+                    .padding(.vertical)
+                    .focusable()
+            }
+            ForEach(viewModel.sections, id: \.title) { section in
+                Section {
+                    sectionRow(section.title)
+                    ForEach(section.items.enumerated().map(KeyValueRow.init)) { item in
+                        Button(action: {}) {
+                            InfoRow(title: item.title, details: item.details)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func sectionRow(_ title: String) -> some View {
+        Button(action: {}) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func goBack() {
+        if let onBack {
+            onBack()
+        } else {
+            dismiss()
+        }
+    }
+}
+#endif
 
  struct StoreDetailsContentsView: View {
      @ObservedObject var viewModel: StoreDetailsViewModel

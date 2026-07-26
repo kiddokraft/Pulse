@@ -6,20 +6,50 @@ import SwiftUI
 
 struct TimingView: View {
     let viewModel: TimingViewModel
+    let barHeightScale: CGFloat
+
+    init(viewModel: TimingViewModel) {
+        self.viewModel = viewModel
+        self.barHeightScale = 1
+    }
+
+    init(viewModel: TimingViewModel, barHeightScale: CGFloat) {
+        self.viewModel = viewModel
+        self.barHeightScale = barHeightScale
+    }
 
     var body: some View {
 #if os(tvOS)
         ForEach(viewModel.sections) { item in
             Section {
                 Button(action: {}) {
-                    TimingSectionView(viewModel: item, parent: viewModel)
+                    Text(item.title)
+                        .font(.subheadline)
+                        .foregroundColor(item.isHeader ? .secondary : .primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                if !item.items.isEmpty {
+                    VStack(spacing: 6) {
+                        ForEach(item.items) { row in
+                            TimingRowView(
+                                viewModel: row,
+                                parent: viewModel,
+                                barHeightScale: barHeightScale
+                            )
+                        }
+                    }
+                    .padding(12)
                 }
             }
         }
 #else
         VStack(spacing: 16) {
             ForEach(viewModel.sections) {
-                TimingSectionView(viewModel: $0, parent: viewModel)
+                TimingSectionView(
+                    viewModel: $0,
+                    parent: viewModel,
+                    barHeightScale: barHeightScale
+                )
             }
         }
 #endif
@@ -29,6 +59,7 @@ struct TimingView: View {
 private struct TimingSectionView: View {
     let viewModel: TimingRowSectionViewModel
     let parent: TimingViewModel
+    let barHeightScale: CGFloat
 
     var body: some View {
         VStack(spacing: 6) {
@@ -44,7 +75,11 @@ private struct TimingSectionView: View {
             }
             if !viewModel.items.isEmpty {
                 ForEach(viewModel.items) { item in
-                    TimingRowView(viewModel: item, parent: parent)
+                    TimingRowView(
+                        viewModel: item,
+                        parent: parent,
+                        barHeightScale: barHeightScale
+                    )
                 }
             }
         }
@@ -54,6 +89,7 @@ private struct TimingSectionView: View {
 private struct TimingRowView: View {
     let viewModel: TimingRowViewModel
     let parent: TimingViewModel
+    let barHeightScale: CGFloat
 
 #if os(tvOS)
     let barHeight: CGFloat = 20
@@ -92,7 +128,7 @@ private struct TimingRowView: View {
                 .frame(width: max(2, proxy.size.width * length))
                 .padding(.leading, proxy.size.width * start)
         }
-        .frame(height: barHeight * sizeCategory.scale)
+        .frame(height: barHeight * barHeightScale * sizeCategory.scale)
     }
 
     private func makeTitle(_ text: String) -> some View {
