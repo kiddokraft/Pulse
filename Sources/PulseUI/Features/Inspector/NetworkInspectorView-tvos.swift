@@ -15,21 +15,71 @@ struct NetworkInspectorView: View {
     @ObservedObject private var settings: UserSettings = .shared
     @Environment(\.store) private var store
     @EnvironmentObject private var environment: ConsoleEnvironment
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.router) private var router
 
+    @ViewBuilder
     var body: some View {
-        contents
-            .inlineNavigationTitle(environment.delegate.getShortTitle(for: task))
-    }
+        if environment.mode == .connection || isConnectionTask {
+            ConnectionInspectorView(task: task)
+        } else {
+            VStack(spacing: 0) {
+                HStack {
+                    Button("Back", action: goBack)
+                    Spacer()
+                    Text(environment.delegate.getShortTitle(for: task))
+                        .font(.headline)
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 40)
+                .padding(.vertical, 12)
 
-    var contents: some View {
-        HStack {
-            Form { lhs }.frame(width: 740)
-            Form { rhs }
+                Divider()
+                networkContents
+            }
         }
     }
 
     @ViewBuilder
-    private var lhs: some View {
+    private var networkContents: some View {
+        if #available(tvOS 17, *) {
+            List {
+                contents
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+        } else {
+            List {
+                contents
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+        }
+    }
+
+    private var isConnectionTask: Bool {
+        if task.isConnection ||
+            task.originalRequest?.headers["Connection-ID"] != nil ||
+            task.originalRequest?.headers["Connection-Network"] != nil ||
+            task.response?.headers["Connection-Upload"] != nil {
+            return true
+        }
+        let scheme = URL(string: task.url ?? "")?.scheme?.lowercased()
+        return scheme == "tcp" || scheme == "udp"
+    }
+
+    private func goBack() {
+        if router.selectedObjectID != nil {
+            router.selectedObjectID = nil
+        } else {
+            dismiss()
+        }
+    }
+
+    @ViewBuilder
+    private var contents: some View {
+        Section {
+            NetworkInspectorView.makeHeaderView(task: task, store: store)
+        }
+
         Section {
             NetworkRequestStatusSectionView(viewModel: .init(task: task, store: store))
         }
@@ -46,18 +96,6 @@ struct NetworkInspectorView: View {
         Section {
             NetworkCURLCell(task: task)
         } header: { Text("Transactions") }
-    }
-
-    @ViewBuilder
-    private var rhs: some View {
-        Section {
-            NetworkInspectorView.makeHeaderView(task: task, store: store)
-                .padding(.bottom, 32)
-        }
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .listRowBackground(Color.clear)
-        NetworkInspectorMetricsViewModel(task: task)
-            .map(NetworkInspectorMetricsView.init)
     }
 }
 

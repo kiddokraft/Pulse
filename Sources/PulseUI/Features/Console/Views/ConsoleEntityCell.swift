@@ -34,6 +34,7 @@ private struct _ConsoleMessageCell: View {
     let message: LoggerMessageEntity
 
     @State private var shareItems: ShareItems?
+    @Environment(\.router) private var router
 
     var body: some View {
 #if os(iOS) || os(visionOS)
@@ -42,6 +43,12 @@ private struct _ConsoleMessageCell: View {
 #elseif os(macOS)
         let cell = ConsoleMessageCell(message: message)
             .tag(ConsoleSelectedItem.entity(message.objectID))
+#elseif os(tvOS)
+        let cell = Button {
+            router.selectedObjectID = message.objectID
+        } label: {
+            ConsoleMessageCell(message: message)
+        }
 #else
         // `id` is a workaround for macOS (needs to be fixed)
         let cell = NavigationLink(destination: ConsoleMessageDetailsView(message: message)) {
@@ -78,6 +85,7 @@ private struct _ConsoleTaskCell: View {
     @State private var shareItems: ShareItems?
     @State private var sharedTask: NetworkTaskEntity?
     @Environment(\.store) private var store
+    @Environment(\.router) private var router
     @EnvironmentObject private var environment: ConsoleEnvironment
 
     var body: some View {
@@ -87,6 +95,12 @@ private struct _ConsoleTaskCell: View {
 #elseif os(macOS)
         let cell = ConsoleTaskCell(task: task)
             .tag(ConsoleSelectedItem.entity(task.objectID))
+#elseif os(tvOS)
+        let cell = Button {
+            router.selectedObjectID = task.objectID
+        } label: {
+            ConsoleTaskCell(task: task)
+        }
 #else
         let cell = NavigationLink(destination: inspector) {
             ConsoleTaskCell(task: task)
@@ -138,6 +152,15 @@ private struct _ConsoleTaskCell: View {
     private var inspector: some View {
         // We don't own NavigationView, so we have to inject the dependencies
         // Route to ConnectionInspectorView for TCP/UDP connections
+#if os(tvOS)
+        if environment.mode == .connection || isTVOSConnection {
+            ConnectionInspectorView(task: task)
+                .injecting(environment)
+        } else {
+            NetworkInspectorView(task: task)
+                .injecting(environment)
+        }
+#else
         if task.isConnection {
             ConnectionInspectorView(task: task)
                 .injecting(environment)
@@ -145,5 +168,19 @@ private struct _ConsoleTaskCell: View {
             NetworkInspectorView(task: task)
                 .injecting(environment)
         }
+#endif
     }
+
+#if os(tvOS)
+    private var isTVOSConnection: Bool {
+        if task.isConnection ||
+            task.originalRequest?.headers["Connection-ID"] != nil ||
+            task.originalRequest?.headers["Connection-Network"] != nil ||
+            task.response?.headers["Connection-Upload"] != nil {
+            return true
+        }
+        let scheme = URL(string: task.url ?? "")?.scheme?.lowercased()
+        return scheme == "tcp" || scheme == "udp"
+    }
+#endif
 }

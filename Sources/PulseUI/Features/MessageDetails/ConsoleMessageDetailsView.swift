@@ -41,8 +41,34 @@ struct ConsoleMessageDetailsView: View {
         }
     }
 #elseif os(tvOS)
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.router) private var router
+
     var body: some View {
-        contents
+        VStack(spacing: 0) {
+            HStack {
+                Button("Back", action: goBack)
+                Text("Log Details")
+                    .font(.headline)
+                Spacer()
+                NavigationLink(destination: ConsoleMessageMetadataView(message: message)) {
+                    Text("Details")
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 12)
+
+            Divider()
+            contents
+        }
+    }
+
+    private func goBack() {
+        if router.selectedObjectID != nil {
+            router.selectedObjectID = nil
+        } else {
+            dismiss()
+        }
     }
 #elseif os(macOS)
     var body: some View {

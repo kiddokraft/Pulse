@@ -11,9 +11,7 @@ import PulseUI
 
 struct ContentView: View {
     var body: some View {
-        NavigationView {
-            ConsoleView(store: .demo)
-        }
+        ConsoleView(store: .mock)
     }
 }
 

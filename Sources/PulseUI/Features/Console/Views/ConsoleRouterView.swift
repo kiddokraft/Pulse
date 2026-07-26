@@ -10,6 +10,8 @@ import Combine
 final class ConsoleRouter: ObservableObject {
 #if os(macOS)
     @Published var selection: ConsoleSelectedItem?
+#elseif os(tvOS)
+    @Published var selectedObjectID: NSManagedObjectID?
 #endif
     @Published var shareItems: ShareItems?
     @Published var isShowingFilters = false

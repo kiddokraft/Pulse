@@ -541,7 +541,119 @@ enum ConnectionTimingBuilder {
 
 // MARK: - watchOS & tvOS Stubs
 
-#if os(watchOS) || os(tvOS)
+#if os(tvOS)
+
+import SwiftUI
+import Pulse
+
+struct ConnectionInspectorView: View {
+    @ObservedObject var task: NetworkTaskEntity
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.router) private var router
+    @State private var tick: UInt = 0
+
+    var body: some View {
+        let _ = tick
+        VStack(spacing: 0) {
+            HStack {
+                Button("Back", action: goBack)
+                Spacer()
+                Text(task.connectionDomain ?? task.host ?? "Connection")
+                    .font(.headline)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 12)
+
+            Divider()
+
+            connectionList
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if task.connectionState == .connected {
+                tick &+= 1
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var connectionList: some View {
+        if #available(tvOS 17, *) {
+            List {
+                TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+                details
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+        } else {
+            List {
+                TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                details
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+        }
+    }
+
+    @ViewBuilder private var details: some View {
+        Section("Connection") {
+            detailRow("Status", value: task.connectionState.title, color: task.connectionState.tintColor)
+            detailRow("Network", value: task.httpMethod?.uppercased())
+            detailRow("Domain", value: task.connectionDomain ?? task.host)
+            detailRow("Source", value: task.connectionSource)
+            detailRow("Destination", value: task.connectionDestination)
+            detailRow("IP Version", value: task.connectionIPVersion)
+            detailRow("Protocol", value: task.connectionProtocol)
+            detailRow("Inbound", value: task.connectionInbound)
+            detailRow("User", value: task.connectionUser)
+        }
+
+        Section("Routing") {
+            detailRow("Rule", value: task.connectionRule)
+            detailRow("Outbound", value: task.connectionOutbound)
+            detailRow("Chain", value: task.connectionChain)
+        }
+
+        Section("Traffic") {
+            detailRow("Upload", value: trafficValue(total: task.connectionUpload, rate: task.connectionUploadRate))
+            detailRow("Download", value: trafficValue(total: task.connectionDownload, rate: task.connectionDownloadRate))
+            if task.effectiveDuration > 0 {
+                detailRow("Duration", value: DurationFormatter.string(from: task.effectiveDuration))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func detailRow(_ title: String, value: String?, color: Color = .secondary) -> some View {
+        if let value, !value.isEmpty {
+            HStack {
+                Text(title)
+                Spacer()
+                Text(value)
+                    .foregroundColor(color)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
+    }
+
+    private func trafficValue(total: String?, rate: String?) -> String? {
+        guard let total else { return nil }
+        guard task.connectionState == .connected, let rate else { return total }
+        return "\(total) (\(rate))"
+    }
+
+    private func goBack() {
+        if router.selectedObjectID != nil {
+            router.selectedObjectID = nil
+        } else {
+            dismiss()
+        }
+    }
+}
+
+#endif
+
+#if os(watchOS)
 
 import SwiftUI
 import Pulse

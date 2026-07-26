@@ -19,22 +19,44 @@ public struct ConsoleView: View {
     }
 
     public var body: some View {
-        GeometryReader { proxy in
-            HStack {
-                consoleList
-
-                // TODO: Not sure it's valid
-                NavigationView {
-                    consoleMenu
-                }
-                .frame(width: 700)
-            }
-            .navigationTitle(environment.title)
-            .onAppear { listViewModel.isViewVisible = true }
-            .onDisappear { listViewModel.isViewVisible = false }
+        NavigationView {
+            splitView
         }
+        .onAppear { listViewModel.isViewVisible = true }
+        .onDisappear { listViewModel.isViewVisible = false }
         .injecting(environment)
         .environmentObject(listViewModel)
+    }
+
+    private var splitView: some View {
+        HStack(spacing: 0) {
+            masterPane
+                .frame(maxWidth: .infinity)
+
+            Divider()
+
+            ConsoleDetailsView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var masterPane: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 24) {
+                modeButton("Connection", mode: .connection)
+                modeButton("Logs", mode: .logs)
+                modeButton("All", mode: .all)
+                Spacer()
+                NavigationLink(destination: ConsoleMenuScreen()) {
+                    Text("Filter")
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 12)
+
+            Divider()
+            consoleList
+        }
     }
 
     @ViewBuilder
@@ -52,18 +74,69 @@ public struct ConsoleView: View {
         }
     }
 
+    private func modeButton(_ title: String, mode: ConsoleMode) -> some View {
+        Button(title) {
+            environment.router.selectedObjectID = nil
+            environment.mode = mode
+        }
+        .disabled(environment.mode == mode)
+    }
+}
+
+private struct ConsoleDetailsView: View {
+    @EnvironmentObject private var router: ConsoleRouter
+    @EnvironmentObject private var environment: ConsoleEnvironment
+    @Environment(\.store) private var store
+
     @ViewBuilder
-    private var consoleMenu: some View {
-        if #available(tvOS 17, *) {
-            Form {
-                ConsoleMenuView()
+    var body: some View {
+        if let objectID = router.selectedObjectID,
+           let entity = try? store.viewContext.existingObject(with: objectID) {
+            switch LoggerEntity(entity) {
+            case .message(let message):
+                ConsoleMessageDetailsView(message: message)
+            case .task(let task):
+                if environment.mode == .connection || isConnection(task) {
+                    ConnectionInspectorView(task: task)
+                } else {
+                    NetworkInspectorView(task: task)
+                }
             }
-            .contentMargins(.horizontal, 40, for: .scrollContent)
         } else {
-            Form {
-                ConsoleMenuView()
-                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            Text("Select an item")
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private func isConnection(_ task: NetworkTaskEntity) -> Bool {
+        if task.isConnection ||
+            task.originalRequest?.headers["Connection-ID"] != nil ||
+            task.originalRequest?.headers["Connection-Network"] != nil ||
+            task.response?.headers["Connection-Upload"] != nil {
+            return true
+        }
+        let scheme = URL(string: task.url ?? "")?.scheme?.lowercased()
+        return scheme == "tcp" || scheme == "udp"
+    }
+}
+
+private struct ConsoleMenuScreen: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        menu
+            .navigationTitle("Console Settings")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Back", action: dismiss.callAsFunction)
+                }
             }
+    }
+
+    @ViewBuilder
+    private var menu: some View {
+        Form {
+            ConsoleMenuView()
         }
     }
 }
@@ -106,15 +179,36 @@ private struct ConsoleMenuView: View {
     }
 
     private var destinationSettings: some View {
-        SettingsView(store: store).padding()
+        SettingsView(store: store)
+            .consoleBackButton()
     }
 
     private var destinationStoreDetails: some View {
-        StoreDetailsView(source: .store(store)).padding()
+        StoreDetailsView(source: .store(store))
+            .consoleBackButton()
     }
 
     private var destinationFilters: some View {
-        ConsoleFiltersView().padding()
+        ConsoleFiltersView()
+            .consoleBackButton()
+    }
+}
+
+private extension View {
+    func consoleBackButton() -> some View {
+        modifier(ConsoleBackButtonModifier())
+    }
+}
+
+private struct ConsoleBackButtonModifier: ViewModifier {
+    @Environment(\.dismiss) private var dismiss
+
+    func body(content: Content) -> some View {
+        content.toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Back", action: dismiss.callAsFunction)
+            }
+        }
     }
 }
 

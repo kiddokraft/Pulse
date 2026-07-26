@@ -139,6 +139,10 @@ struct ConsoleConstants {
     static let fontTitle = Font.subheadline.monospacedDigit()
     static let fontInfo = Font.caption.monospacedDigit()
     static let fontBody = Font.callout
+#elseif os(tvOS)
+    static let fontTitle = Font.body
+    static let fontInfo = Font.subheadline
+    static let fontBody = Font.body
 #else
     static let fontTitle = Font.caption
     static let fontInfo = Font.caption
