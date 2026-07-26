@@ -2731,7 +2731,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "Demo/tvOS/Preview\\ Content";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QC6CCB6JU7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Demo/tvOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2756,7 +2756,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "Demo/tvOS/Preview\\ Content";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QC6CCB6JU7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Demo/tvOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

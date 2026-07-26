@@ -251,6 +251,8 @@ private struct ConsoleMenuView: View {
     private var destinationFilters: some View {
         ConsoleFiltersView()
             .consoleBackButton()
+            .injecting(environment)
+            .environmentObject(viewModel)
     }
 }
 
