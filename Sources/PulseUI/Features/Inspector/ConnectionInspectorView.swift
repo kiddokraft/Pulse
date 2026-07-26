@@ -510,7 +510,7 @@ enum ConnectionTimingBuilder {
         rows.append(TimingRowViewModel(
             title: "Upload",
             value: uploadStr,
-            color: UXColor(red: 0.620, green: 0.224, blue: 0.000, alpha: 1.0),
+            color: .systemBlue,
             start: 0.0,
             length: max(0.02, uploadFraction)
         ))
@@ -526,7 +526,7 @@ enum ConnectionTimingBuilder {
         rows.append(TimingRowViewModel(
             title: "Download",
             value: downloadStr,
-            color: UXColor(red: 1.000, green: 0.541, blue: 0.000, alpha: 1.0),
+            color: .systemGreen,
             start: totalBytes > 0 ? uploadFraction : 0.5,
             length: max(0.02, downloadFraction)
         ))

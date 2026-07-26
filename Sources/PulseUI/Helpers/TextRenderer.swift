@@ -208,7 +208,7 @@ final class TextRenderer {
         let statusTitle = task.connectionState == .complete ? "Complete" : "Active"
         let statusColor = task.connectionState == .complete
             ? UXColor.systemGray
-            : UXColor.systemOrange
+            : UXColor.systemGreen
         string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
         string.append(spacer())
 
