@@ -10,6 +10,33 @@ import UIKit
 
 import SwiftUI
 
+enum ConnectionColors {
+    static var connected: UXColor {
+        asset(named: UserSettings.shared.connectionColorAssetNames.connected) ?? .systemGreen
+    }
+
+    static var complete: UXColor {
+        asset(named: UserSettings.shared.connectionColorAssetNames.complete) ?? .systemGray
+    }
+
+    static var upload: UXColor {
+        asset(named: UserSettings.shared.connectionColorAssetNames.upload) ?? .systemBlue
+    }
+
+    static var download: UXColor {
+        asset(named: UserSettings.shared.connectionColorAssetNames.download) ?? .systemGreen
+    }
+
+    private static func asset(named name: String?) -> UXColor? {
+        guard let name, !name.isEmpty else { return nil }
+#if os(macOS)
+        return NSColor(named: NSColor.Name(name), bundle: .main)
+#else
+        return UIColor(named: name, in: .main, compatibleWith: nil)
+#endif
+    }
+}
+
 // A set of typealias and APIs to make AppKit and UIKit more
 // compatible with each other
 
