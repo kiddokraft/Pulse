@@ -14,15 +14,15 @@ import Combine
 /// without HTTP-specific fields like request/response body and cURL.
 @available(iOS 15, visionOS 1.0, *)
 struct ConnectionInspectorView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
 
     @State private var shareItems: ShareItems?
-    @State private var tick: UInt = 0
+    @State private var refreshRevision: UInt = 0
     @EnvironmentObject private var environment: ConsoleEnvironment
     @Environment(\.store) private var store
 
     var body: some View {
-        let _ = tick
+        let _ = refreshRevision
         VStack(spacing: 0){
 
 
@@ -42,11 +42,9 @@ struct ConnectionInspectorView: View {
         }
         .inlineNavigationTitle(task.connectionDomain ?? task.host ?? "Connection")
         .sheet(item: $shareItems, content: ShareView.init)
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if task.connectionState == .connected {
-                tick &+= 1
-            }
-        }
+        .background(ConnectionCompletionObserver(task: task) {
+            refreshRevision &+= 1
+        })
     }
 
     @ViewBuilder
@@ -113,7 +111,7 @@ struct ConnectionInspectorView: View {
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionHeaderView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
     @State private var isPulsing = false
 
     var body: some View {
@@ -202,7 +200,7 @@ private struct ConnectionHeaderView: View {
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionStatusView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
 
     var body: some View {
         HStack {
@@ -227,7 +225,7 @@ private struct ConnectionStatusView: View {
             }
         }
 
-        if task.effectiveDuration > 0 {
+        if task.connectionState != .connected, task.effectiveDuration > 0 {
             HStack {
                 Text("Duration")
                 Spacer()
@@ -242,7 +240,7 @@ private struct ConnectionStatusView: View {
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionDetailsSection: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
 
     var body: some View {
         // Network type (TCP/UDP)
@@ -300,7 +298,7 @@ private struct ConnectionDetailsSection: View {
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionRoutingView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
 
     var body: some View {
         if let rule = task.connectionRule, !rule.isEmpty {
@@ -338,7 +336,7 @@ private struct ConnectionRoutingView: View {
 
 @available(iOS 15, visionOS 1.0, *)
 private struct ConnectionTrafficView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
 
     var body: some View {
         // Upload total
@@ -429,26 +427,22 @@ import Combine
 
 @available(macOS 13, *)
 struct ConnectionInspectorView: View {
-    @ObservedObject var task: NetworkTaskEntity
-    @State private var tick: UInt = 0
+    let task: NetworkTaskEntity
+    @State private var refreshRevision: UInt = 0
     @Environment(\.store) private var store
 
     var body: some View {
-        let _ = tick
+        let _ = refreshRevision
         VStack(spacing: 0) {
             toolbar
             Divider()
             ConnectionTimingViewMac(task: task)
             Divider()
             RichTextView(viewModel: makeSummaryViewModel())
-
-
         }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if task.connectionState == .connected {
-                tick &+= 1
-            }
-        }
+        .background(ConnectionCompletionObserver(task: task) {
+            refreshRevision &+= 1
+        })
     }
 
     private func makeSummaryViewModel() -> RichTextViewModel {
@@ -539,6 +533,21 @@ enum ConnectionTimingBuilder {
     }
 }
 
+private struct ConnectionCompletionObserver: View {
+    @ObservedObject var task: NetworkTaskEntity
+    let onComplete: () -> Void
+
+    var body: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .onChange(of: task.connectionState) { state in
+                if state != .connected {
+                    onComplete()
+                }
+            }
+    }
+}
+
 // MARK: - watchOS & tvOS Stubs
 
 #if os(tvOS)
@@ -547,50 +556,47 @@ import SwiftUI
 import Pulse
 
 struct ConnectionInspectorView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
     @Environment(\.dismiss) private var dismiss
     @Environment(\.router) private var router
-    @State private var tick: UInt = 0
+    @State private var refreshRevision: UInt = 0
 
     var body: some View {
-        let _ = tick
-        VStack(spacing: 0) {
-            HStack {
-                Button("Back", action: goBack)
-                Spacer()
-                Text(task.connectionDomain ?? task.host ?? "Connection")
-                    .font(.headline)
-                    .lineLimit(1)
-            }
-            .padding(.horizontal, 40)
-            .padding(.vertical, 12)
-
-            Divider()
-
-            connectionList
-        }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if task.connectionState == .connected {
-                tick &+= 1
-            }
-        }
+        let _ = refreshRevision
+        connectionList
+            .background(ConnectionCompletionObserver(task: task) {
+                refreshRevision &+= 1
+            })
     }
 
     @ViewBuilder
     private var connectionList: some View {
         if #available(tvOS 17, *) {
             List {
-                TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+                detailHeader
+                ConnectionTimingViewTV(task: task)
                 details
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
         } else {
             List {
-                TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+                detailHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                ConnectionTimingViewTV(task: task)
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 details
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
             }
+        }
+    }
+
+    private var detailHeader: some View {
+        HStack {
+            Button("Back", action: goBack)
+            Spacer()
+            Text(task.connectionDomain ?? task.host ?? "Connection")
+                .font(.headline)
+                .lineLimit(1)
         }
     }
 
@@ -616,7 +622,7 @@ struct ConnectionInspectorView: View {
         Section("Traffic") {
             detailRow("Upload", value: trafficValue(total: task.connectionUpload, rate: task.connectionUploadRate))
             detailRow("Download", value: trafficValue(total: task.connectionDownload, rate: task.connectionDownloadRate))
-            if task.effectiveDuration > 0 {
+            if task.connectionState != .connected, task.effectiveDuration > 0 {
                 detailRow("Duration", value: DurationFormatter.string(from: task.effectiveDuration))
             }
         }
@@ -625,13 +631,15 @@ struct ConnectionInspectorView: View {
     @ViewBuilder
     private func detailRow(_ title: String, value: String?, color: Color = .secondary) -> some View {
         if let value, !value.isEmpty {
-            HStack {
-                Text(title)
-                Spacer()
-                Text(value)
-                    .foregroundColor(color)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+            Button(action: {}) {
+                HStack {
+                    Text(title)
+                    Spacer()
+                    Text(value)
+                        .foregroundColor(color)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
             }
         }
     }
@@ -651,6 +659,14 @@ struct ConnectionInspectorView: View {
     }
 }
 
+private struct ConnectionTimingViewTV: View {
+    @ObservedObject var task: NetworkTaskEntity
+
+    var body: some View {
+        TimingView(viewModel: ConnectionTimingBuilder.makeTimingViewModel(for: task))
+    }
+}
+
 #endif
 
 #if os(watchOS)
@@ -659,9 +675,11 @@ import SwiftUI
 import Pulse
 
 struct ConnectionInspectorView: View {
-    @ObservedObject var task: NetworkTaskEntity
+    let task: NetworkTaskEntity
+    @State private var refreshRevision: UInt = 0
 
     var body: some View {
+        let _ = refreshRevision
         List {
             Section {
                 HStack {
@@ -711,6 +729,9 @@ struct ConnectionInspectorView: View {
             }
         }
         .navigationTitle("Connection")
+        .background(ConnectionCompletionObserver(task: task) {
+            refreshRevision &+= 1
+        })
     }
 }
 

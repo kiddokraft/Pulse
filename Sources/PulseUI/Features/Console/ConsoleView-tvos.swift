@@ -12,18 +12,37 @@ import Combine
 public struct ConsoleView: View {
     @StateObject private var environment: ConsoleEnvironment
     @StateObject private var listViewModel: ConsoleListViewModel
+    @StateObject private var searchBarViewModel: ConsoleSearchBarViewModel
+    @StateObject private var searchViewModel: ConsoleSearchViewModel
 
     init(environment: ConsoleEnvironment) {
+        let listViewModel = ConsoleListViewModel(environment: environment, filters: environment.filters)
+        let searchBarViewModel = ConsoleSearchBarViewModel()
         _environment = StateObject(wrappedValue: environment)
-        _listViewModel = StateObject(wrappedValue: .init(environment: environment, filters: environment.filters))
+        _listViewModel = StateObject(wrappedValue: listViewModel)
+        _searchBarViewModel = StateObject(wrappedValue: searchBarViewModel)
+        _searchViewModel = StateObject(wrappedValue: ConsoleSearchViewModel(
+            environment: environment,
+            source: listViewModel,
+            searchBar: searchBarViewModel
+        ))
     }
 
     public var body: some View {
         NavigationView {
             splitView
         }
-        .onAppear { listViewModel.isViewVisible = true }
-        .onDisappear { listViewModel.isViewVisible = false }
+        .onAppear {
+            listViewModel.isViewVisible = true
+            searchViewModel.isSearchActive = !searchBarViewModel.text.isEmpty
+        }
+        .onDisappear {
+            listViewModel.isViewVisible = false
+            searchViewModel.isSearchActive = false
+        }
+        .onChange(of: searchBarViewModel.text) { text in
+            searchViewModel.isSearchActive = !text.trimmingCharacters(in: .whitespaces).isEmpty
+        }
         .injecting(environment)
         .environmentObject(listViewModel)
     }
@@ -31,55 +50,91 @@ public struct ConsoleView: View {
     private var splitView: some View {
         HStack(spacing: 0) {
             masterPane
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
             Divider()
 
             ConsoleDetailsView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
 
     private var masterPane: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 24) {
-                modeButton("Connection", mode: .connection)
-                modeButton("Logs", mode: .logs)
-                modeButton("All", mode: .all)
-                Spacer()
-                NavigationLink(destination: ConsoleMenuScreen()) {
-                    Text("Filter")
-                }
-            }
-            .padding(.horizontal, 40)
-            .padding(.vertical, 12)
-
-            Divider()
-            consoleList
-        }
+        consoleList
     }
 
     @ViewBuilder
     private var consoleList: some View {
         if #available(tvOS 17, *) {
             List {
-                ConsoleListContentView()
+                searchHeader
+                modePicker
+                filterLink
+                consoleListContent
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
         } else {
             List {
-                ConsoleListContentView()
+                searchHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                modePicker
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                filterLink
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                consoleListContent
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
             }
         }
     }
 
-    private func modeButton(_ title: String, mode: ConsoleMode) -> some View {
-        Button(title) {
-            environment.router.selectedObjectID = nil
-            environment.mode = mode
+    private var searchHeader: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search", text: $searchBarViewModel.text)
+                .onSubmit(searchViewModel.onSubmitSearch)
         }
-        .disabled(environment.mode == mode)
+    }
+
+    private var modePicker: some View {
+        Picker("View", selection: modeSelection) {
+            Text("Connection").tag(ConsoleMode.connection)
+            Text("Logs").tag(ConsoleMode.logs)
+            Text("All").tag(ConsoleMode.all)
+        }
+        .labelsHidden()
+        .pickerStyle(.segmented)
+    }
+
+    private var filterLink: some View {
+        NavigationLink(destination: ConsoleMenuScreen(filters: environment.filters)) {
+            Text("Filter")
+        }
+    }
+
+    @ViewBuilder
+    private var consoleListContent: some View {
+        if searchBarViewModel.text.trimmingCharacters(in: .whitespaces).isEmpty {
+            ConsoleListContentView()
+        } else if searchViewModel.results.isEmpty {
+            Text(searchViewModel.isSearching ? "Searching…" : "No Results")
+                .foregroundColor(.secondary)
+                .focusable()
+        } else {
+            ForEach(searchViewModel.results) { result in
+                ConsoleEntityCell(entity: result.entity)
+            }
+        }
+    }
+
+    private var modeSelection: Binding<ConsoleMode> {
+        Binding(
+            get: { environment.mode },
+            set: { mode in
+                environment.router.selectedObjectID = nil
+                environment.mode = mode
+            }
+        )
     }
 }
 
@@ -121,10 +176,12 @@ private struct ConsoleDetailsView: View {
 }
 
 private struct ConsoleMenuScreen: View {
+    @ObservedObject var filters: ConsoleFiltersViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         menu
+            .environmentObject(filters)
             .navigationTitle("Console Settings")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

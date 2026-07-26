@@ -24,21 +24,28 @@ struct NetworkRequestStatusCell: View {
 
 #else
     var body: some View {
-        HStack(spacing: spacing) {
-            viewModel.status.text
-                .lineLimit(1)
-            Spacer()
-            detailsView
-        }
 #if os(tvOS)
+        Button(action: {}) {
+            statusContents
+        }
         .font(.system(size: 38, weight: .bold))
         .padding(.top, 16)
         .padding(.bottom, 16)
         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowBackground(Color.clear)
 #else
-        .font(.headline)
+        statusContents
+            .font(.headline)
 #endif
+    }
+
+    private var statusContents: some View {
+        HStack(spacing: spacing) {
+            viewModel.status.text
+                .lineLimit(1)
+            Spacer()
+            detailsView
+        }
     }
 
     #endif

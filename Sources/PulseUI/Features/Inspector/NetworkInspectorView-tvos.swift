@@ -23,20 +23,7 @@ struct NetworkInspectorView: View {
         if environment.mode == .connection || isConnectionTask {
             ConnectionInspectorView(task: task)
         } else {
-            VStack(spacing: 0) {
-                HStack {
-                    Button("Back", action: goBack)
-                    Spacer()
-                    Text(environment.delegate.getShortTitle(for: task))
-                        .font(.headline)
-                        .lineLimit(1)
-                }
-                .padding(.horizontal, 40)
-                .padding(.vertical, 12)
-
-                Divider()
-                networkContents
-            }
+            networkContents
         }
     }
 
@@ -44,14 +31,27 @@ struct NetworkInspectorView: View {
     private var networkContents: some View {
         if #available(tvOS 17, *) {
             List {
+                detailHeader
                 contents
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
         } else {
             List {
+                detailHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 contents
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
             }
+        }
+    }
+
+    private var detailHeader: some View {
+        HStack {
+            Button("Back", action: goBack)
+            Spacer()
+            Text(environment.delegate.getShortTitle(for: task))
+                .font(.headline)
+                .lineLimit(1)
         }
     }
 
@@ -77,7 +77,9 @@ struct NetworkInspectorView: View {
     @ViewBuilder
     private var contents: some View {
         Section {
-            NetworkInspectorView.makeHeaderView(task: task, store: store)
+            Button(action: {}) {
+                NetworkInspectorView.makeHeaderView(task: task, store: store)
+            }
         }
 
         Section {

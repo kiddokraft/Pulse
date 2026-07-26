@@ -57,23 +57,23 @@ struct ConsoleSearchListSelectionView<Data: RandomAccessCollection, ID: Hashable
         if items.isEmpty {
             emptyView
         } else {
+#if os(tvOS)
+            ForEach(items.prefix(limit), id: id, content: makeRow)
+#else
             ForEach(items.prefix(limit), id: id, content: makeRow)
                 .sheet(isPresented: $isExpandedListPresented) {
                     NavigationView {
                         expandedListBody
                     }
                 }
+#endif
             if items.count > limit {
                 let viewAllView = HStack {
                     Text("View All").foregroundColor(.accentColor)
                     Spacer()
                     Text("\(items.count) ").foregroundColor(.secondary)
                 }
-#if os(tvOS)
-                Button(action: { isExpandedListPresented = true }) { viewAllView }
-#else
                 NavigationLink(destination: expandedListBody) { viewAllView }
-#endif
             }
         }
     }
@@ -85,9 +85,6 @@ struct ConsoleSearchListSelectionView<Data: RandomAccessCollection, ID: Hashable
             ForEach(filteredItems, id: id, content: makeRow)
         }
         .inlineNavigationTitle(title)
-#if os(tvOS)
-        .frame(width: 800)
-#endif
 #if os(iOS) || os(visionOS)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .disableAutocorrection(true)

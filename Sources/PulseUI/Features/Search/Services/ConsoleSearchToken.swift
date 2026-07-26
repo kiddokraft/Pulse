@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2020-2024 Alexander Grebenyuk (github.com/kean).
 
-#if os(iOS) || os(macOS) || os(visionOS)
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
 
 import Foundation
 import SwiftUI

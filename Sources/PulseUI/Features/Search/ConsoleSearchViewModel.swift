@@ -13,7 +13,7 @@ protocol ConsoleEntitiesSource {
     var entities: [NSManagedObject] { get }
 }
 
-#if os(iOS) || os(macOS) || os(visionOS)
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
 
 final class ConsoleSearchBarViewModel: ObservableObject {
     @Published var text: String = ""

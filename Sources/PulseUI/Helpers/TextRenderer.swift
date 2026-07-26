@@ -288,7 +288,7 @@ final class TextRenderer {
                 trafficItems.append(("Download", download))
             }
         }
-        if task.effectiveDuration > 0 {
+        if task.connectionState != .connected, task.effectiveDuration > 0 {
             trafficItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
         }
 
@@ -378,7 +378,7 @@ final class TextRenderer {
                 trafficItems.append(("Download", download))
             }
         }
-        if task.effectiveDuration > 0 {
+        if task.connectionState != .connected, task.effectiveDuration > 0 {
             trafficItems.append(("Duration", DurationFormatter.string(from: task.effectiveDuration)))
         }
         if let time = task.createdAt as Date? {
