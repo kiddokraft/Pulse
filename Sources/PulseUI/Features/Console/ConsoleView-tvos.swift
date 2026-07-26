@@ -21,15 +21,11 @@ public struct ConsoleView: View {
     public var body: some View {
         GeometryReader { proxy in
             HStack {
-                List {
-                    ConsoleListContentView()
-                }
+                consoleList
 
                 // TODO: Not sure it's valid
                 NavigationView {
-                    Form {
-                        ConsoleMenuView()
-                    }.padding()
+                    consoleMenu
                 }
                 .frame(width: 700)
             }
@@ -39,6 +35,36 @@ public struct ConsoleView: View {
         }
         .injecting(environment)
         .environmentObject(listViewModel)
+    }
+
+    @ViewBuilder
+    private var consoleList: some View {
+        if #available(tvOS 17, *) {
+            List {
+                ConsoleListContentView()
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+        } else {
+            List {
+                ConsoleListContentView()
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var consoleMenu: some View {
+        if #available(tvOS 17, *) {
+            Form {
+                ConsoleMenuView()
+            }
+            .contentMargins(.horizontal, 40, for: .scrollContent)
+        } else {
+            Form {
+                ConsoleMenuView()
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+            }
+        }
     }
 }
 
