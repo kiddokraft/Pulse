@@ -41,6 +41,7 @@ struct ConsoleListContentView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         } else {
+#if os(iOS) || os(macOS) || os(visionOS)
             ForEach(viewModel.visibleEntities, id: \.objectID) { entity in
                 let objectID = entity.objectID
                 ConsoleEntityCell(entity: entity)
@@ -48,6 +49,9 @@ struct ConsoleListContentView: View {
                     .onAppear { viewModel.onAppearCell(with: objectID) }
                     .onDisappear { viewModel.onDisappearCell(with: objectID) }
             }
+#else
+            ForEach(viewModel.entities, id: \.objectID, content: ConsoleEntityCell.init)
+#endif
         }
         footerView
     }

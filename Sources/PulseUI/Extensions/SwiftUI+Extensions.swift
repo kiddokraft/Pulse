@@ -36,7 +36,7 @@ extension View {
         if #available(tvOS 16, *) {
             self.tint(Color.accentColor)
         } else {
-            self.toggleStyle(SwitchToggleStyle(tint: Color.accentColor))
+            self
         }
 #elseif os(visionOS)
         self.tint(Color.accentColor)
