@@ -107,7 +107,10 @@ public struct ConsoleView: View {
     }
 
     private var filterLink: some View {
-        NavigationLink(destination: ConsoleMenuScreen(filters: environment.filters)) {
+        NavigationLink(destination:
+            ConsoleMenuScreen(filters: environment.filters)
+                .injecting(environment)
+        ) {
             Text("Filter")
         }
     }
