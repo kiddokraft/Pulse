@@ -52,12 +52,10 @@ private struct _InternalConsoleListView: View {
         if #available(iOS 16, *) {
             _ConsoleListView()
                 .environment(\.defaultMinListRowHeight, 8)
-#if os(macOS)
                 .searchable(text: $searchBarViewModel.text)
                 .searchSuggestions {
                     ConsoleSearchSuggestionsView()
                 }
-#endif
                 .onSubmit(of: .search, searchViewModel.value.onSubmitSearch)
                 .disableAutocorrection(true)
 #if os(iOS) || os(visionOS)
