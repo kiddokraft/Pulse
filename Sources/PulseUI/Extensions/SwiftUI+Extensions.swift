@@ -5,6 +5,11 @@
 import SwiftUI
 import Combine
 
+extension Color {
+    /// Semantic tint for a temporarily paused connection.
+    static var pause: Color { .pink }
+}
+
 #if os(iOS) || os(macOS) || os(visionOS)
 extension Color {
     static var separator: Color { Color(UXColor.separator) }

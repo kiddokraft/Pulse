@@ -159,34 +159,7 @@ struct ConsoleTaskCell: View {
 
     @ViewBuilder
     private var connectionStatusLabel: some View {
-        HStack(spacing: connectionStatusSpacing) {
-            Circle()
-                .fill(task.connectionState.tintColor)
-                .frame(width: connectionStatusDotSize, height: connectionStatusDotSize)
-            #if os(iOS) || os(tvOS)
-            Text(task.connectionState.title)
-                .font(ConsoleConstants.fontTitle)
-                .fontWeight(.medium)
-                .foregroundColor(task.connectionState.tintColor)
-                .lineLimit(1)
-            #endif
-        }
-    }
-
-    private var connectionStatusDotSize: CGFloat {
-#if os(tvOS)
-        14
-#else
-        8
-#endif
-    }
-
-    private var connectionStatusSpacing: CGFloat {
-#if os(tvOS)
-        8
-#else
-        4
-#endif
+        ConnectionStatusLabel(task: task)
     }
 
     private func makeInfoText(_ image: String, _ text: String) -> Text {
@@ -217,6 +190,58 @@ struct ConsoleTaskCell: View {
             .padding(.top, 6)
             .padding(.trailing, -7)
         }
+    }
+}
+
+private struct ConnectionStatusLabel: View {
+    @ObservedObject var task: NetworkTaskEntity
+    private let message: LoggerMessageEntity?
+    @State private var isPaused: Bool
+
+    init(task: NetworkTaskEntity) {
+        self.task = task
+        message = task.message
+        _isPaused = State(initialValue: task.message?.isPinned ?? false)
+    }
+
+    var body: some View {
+        HStack(spacing: connectionStatusSpacing) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: connectionStatusDotSize, height: connectionStatusDotSize)
+            #if os(iOS) || os(tvOS)
+            Text(statusTitle)
+                .font(ConsoleConstants.fontTitle)
+                .fontWeight(.medium)
+                .foregroundColor(statusColor)
+                .lineLimit(1)
+            #endif
+        }
+        .onReceive(
+            message?.publisher(for: \.isPinned).removeDuplicates().eraseToAnyPublisher()
+                ?? Empty().eraseToAnyPublisher()
+        ) {
+            isPaused = $0
+        }
+    }
+
+    private var statusTitle: String { isPaused ? "Paused" : task.connectionState.title }
+    private var statusColor: Color { isPaused ? .pause : task.connectionState.tintColor }
+
+    private var connectionStatusDotSize: CGFloat {
+        #if os(tvOS)
+            14
+        #else
+            8
+        #endif
+    }
+
+    private var connectionStatusSpacing: CGFloat {
+        #if os(tvOS)
+            8
+        #else
+            4
+        #endif
     }
 }
 

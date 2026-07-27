@@ -86,7 +86,7 @@ enum ContextMenu {
 #endif
             if let message = task.message {
                 Section {
-                    ConnectionPinButton(task: task)
+                    PinButton(viewModel: .init(message))
                 }
             }
 #if os(iOS) || os(visionOS)
@@ -234,7 +234,7 @@ enum ContextMenu {
             }
             if let message = task.message {
                 Section {
-                    PinButton(viewModel: .init(message))
+                    ConnectionPinButton(task: task)
                 }
             }
 #if os(iOS) || os(visionOS)
