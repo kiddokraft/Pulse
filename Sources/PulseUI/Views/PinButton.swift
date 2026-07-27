@@ -25,6 +25,48 @@ struct PinButton: View {
     }
 }
 
+/// Uses the existing pin state and visual placement, while allowing a host to
+/// make pin/unpin perform a reversible connection-specific action.
+struct ConnectionPinButton: View {
+    @ObservedObject private var viewModel: PinButtonViewModel
+    private let task: NetworkTaskEntity
+    @EnvironmentObject private var environment: ConsoleEnvironment
+    @State private var isUpdating = false
+
+    init(task: NetworkTaskEntity) {
+        self.task = task
+        _viewModel = ObservedObject(wrappedValue: .init(task))
+    }
+
+    var body: some View {
+        Button {
+            guard !isUpdating else { return }
+            guard let action = environment.connectionPinAction else {
+                viewModel.togglePin()
+                return
+            }
+            isUpdating = true
+            let shouldPause = !viewModel.isPinned
+            Task {
+                defer { isUpdating = false }
+                do {
+                    try await action(.init(task), shouldPause)
+                    viewModel.togglePin()
+                } catch {
+                    // The host presents its own error UI. Keep the pin state
+                    // unchanged when the network action fails.
+                }
+            }
+        } label: {
+            Label(
+                viewModel.isPinned ? "Resume" : "Pause",
+                systemImage: viewModel.isPinned ? "pin.fill" : "pin"
+            )
+        }
+        .disabled(isUpdating)
+    }
+}
+
 struct PinView: View {
     private var message: LoggerMessageEntity?
     @State private var isPinned = false

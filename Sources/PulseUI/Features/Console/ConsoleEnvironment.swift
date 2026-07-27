@@ -26,6 +26,7 @@ final class ConsoleEnvironment: ObservableObject {
 
     let initialMode: ConsoleMode
     let delegate: ConsoleViewDelegate
+    let connectionPinAction: ((ConsoleConnectionPinAction, Bool) async throws -> Void)?
 
     @Published var mode: ConsoleMode
     @Published var listOptions: ConsoleListOptions = .init()
@@ -40,7 +41,12 @@ final class ConsoleEnvironment: ObservableObject {
 
     private var cancellables: [AnyCancellable] = []
 
-    init(store: LoggerStore, mode: ConsoleMode = .all, delegate: ConsoleViewDelegate = DefaultConsoleViewDelegate()) {
+    init(
+        store: LoggerStore,
+        mode: ConsoleMode = .all,
+        delegate: ConsoleViewDelegate = DefaultConsoleViewDelegate(),
+        connectionPinAction: ((ConsoleConnectionPinAction, Bool) async throws -> Void)? = nil
+    ) {
         self.store = store
         switch mode {
         case .all: self.title = "Console"
@@ -58,6 +64,7 @@ final class ConsoleEnvironment: ObservableObject {
         }
 
         self.delegate = delegate
+        self.connectionPinAction = connectionPinAction
 
         func makeDefaultOptions() -> ConsoleDataSource.PredicateOptions {
             var options = ConsoleDataSource.PredicateOptions()

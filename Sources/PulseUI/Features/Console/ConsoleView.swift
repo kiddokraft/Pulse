@@ -20,8 +20,14 @@ extension ConsoleView {
     public init(
         store: LoggerStore = .shared,
         mode: ConsoleMode = .all,
-        delegate: ConsoleViewDelegate? = nil
+        delegate: ConsoleViewDelegate? = nil,
+        connectionPinAction: ((ConsoleConnectionPinAction, Bool) async throws -> Void)? = nil
     ) {
-        self.init(environment: .init(store: store, mode: mode, delegate: delegate ?? DefaultConsoleViewDelegate()))
+        self.init(environment: .init(
+            store: store,
+            mode: mode,
+            delegate: delegate ?? DefaultConsoleViewDelegate(),
+            connectionPinAction: connectionPinAction
+        ))
     }
 }

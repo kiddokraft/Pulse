@@ -109,7 +109,11 @@ private struct _ConsoleTaskCell: View {
 
 #if os(iOS) || os(macOS) || os(visionOS)
         cell.swipeActions(edge: .leading, allowsFullSwipe: true) {
-            PinButton(viewModel: .init(task)).tint(.pink)
+            if task.isConnection {
+                ConnectionPinButton(task: task).tint(.pink)
+            } else {
+                PinButton(viewModel: .init(task)).tint(.pink)
+            }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(action: {
