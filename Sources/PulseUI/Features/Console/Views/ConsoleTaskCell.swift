@@ -26,9 +26,7 @@ struct ConsoleTaskCell: View {
         let contents = VStack(alignment: .leading, spacing: spacing) {
             title.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             message
-#if !os(macOS)
             details
-#endif
 #if os(iOS) || os(visionOS)
             requestHeaders
 #endif
@@ -37,7 +35,7 @@ struct ConsoleTaskCell: View {
 //            .animation(.default, value: task.state)
 #endif
 #if os(macOS)
-        contents.padding(.vertical, 5)
+        contents.padding(5)
 #else
         if #unavailable(iOS 16) {
             contents.padding(.vertical, 4)
@@ -62,9 +60,6 @@ struct ConsoleTaskCell: View {
                     .foregroundColor(task.state.tintColor)
                     .lineLimit(1)
             }
-#if os(macOS)
-            details
-#endif
             Spacer()
 #if os(iOS) || os(macOS) || os(visionOS)
             PinView(task: task)
@@ -209,7 +204,7 @@ private struct ConnectionStatusLabel: View {
             Circle()
                 .fill(statusColor)
                 .frame(width: connectionStatusDotSize, height: connectionStatusDotSize)
-            #if os(iOS) || os(tvOS)
+            #if os(iOS) || os(macOS) || os(tvOS)
             Text(statusTitle)
                 .font(ConsoleConstants.fontTitle)
                 .fontWeight(.medium)

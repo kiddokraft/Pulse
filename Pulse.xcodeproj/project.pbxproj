@@ -19,6 +19,7 @@
 		0C0B31F926D179A70045C9E1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0C0B31F726D179A70045C9E1 /* LaunchScreen.storyboard */; };
 		0C1000472972EE9E00150E8E /* bigstore.pulse in Resources */ = {isa = PBXBuildFile; fileRef = 0C1000462972EE9E00150E8E /* bigstore.pulse */; };
 		0C1050E529E1FAC1006AFDAD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1050E429E1FAC1006AFDAD /* Version.swift */; };
+		0C1100022E0000010059786A /* ConnectionPinAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1100012E0000010059786A /* ConnectionPinAction.swift */; };
 		0C11EAB12971DB700059786A /* RemoteLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF0D69A296F18D200EED9D4 /* RemoteLoggerTests.swift */; };
 		0C11EAB22971DB700059786A /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF0D6A1296F18D200EED9D4 /* Resources.swift */; };
 		0C11EAB32971DB700059786A /* LoggerStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF0D69C296F18D200EED9D4 /* LoggerStoreTests.swift */; };
@@ -509,6 +510,7 @@
 		0C0B31FA26D179A70045C9E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0C1000462972EE9E00150E8E /* bigstore.pulse */ = {isa = PBXFileReference; lastKnownFileType = file; path = bigstore.pulse; sourceTree = "<group>"; };
 		0C1050E429E1FAC1006AFDAD /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
+		0C1100012E0000010059786A /* ConnectionPinAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionPinAction.swift; sourceTree = "<group>"; };
 		0C11EAC12971E9B30059786A /* PulsePerformanceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulsePerformanceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C11EACB2971E9CE0059786A /* TextRendererPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRendererPerformanceTests.swift; sourceTree = "<group>"; };
 		0C1221E525CE09C100B81D7A /* URLSessionAutomatedIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionAutomatedIntegration.swift; sourceTree = "<group>"; };
@@ -1400,6 +1402,7 @@
 				0CF0D5FD296F189600EED9D4 /* ConsoleView-macos.swift */,
 				0CF0D5FB296F189600EED9D4 /* ConsoleView-watchos.swift */,
 				0CBEF6A429DF69E800132FB3 /* ConsoleView.swift */,
+				0C1100012E0000010059786A /* ConnectionPinAction.swift */,
 				0CA2632D2BFA3855003C8E97 /* ConsoleDelegate.swift */,
 				0CF0D60A296F189600EED9D4 /* ConsoleEnvironment.swift */,
 				0CECF63C2996BE12000F9CCD /* ConsoleDataSource.swift */,
@@ -2033,6 +2036,7 @@
 				0CF0D622296F189600EED9D4 /* Formatters.swift in Sources */,
 				0CF0D62F296F189600EED9D4 /* TextView.swift in Sources */,
 				0CBEF6A629DF69EB00132FB3 /* ConsoleView.swift in Sources */,
+				0C1100022E0000010059786A /* ConnectionPinAction.swift in Sources */,
 				0CF0D67D296F189600EED9D4 /* ConsoleEntityCell.swift in Sources */,
 				0CF0D649296F189600EED9D4 /* DateRangePicker.swift in Sources */,
 				0C7A0E00297C51CE00B4B69D /* ConsoleListOptions.swift in Sources */,
@@ -2539,7 +2543,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NR8DLKJ7E6;
+				DEVELOPMENT_TEAM = QC6CCB6JU7;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2584,7 +2588,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NR8DLKJ7E6;
+				DEVELOPMENT_TEAM = QC6CCB6JU7;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2745,6 +2749,7 @@
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 			};
 			name = Debug;
 		};
@@ -2771,6 +2776,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = PULSE_MOCK_INCLUDED;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 			};
 			name = Release;
 		};
@@ -2998,6 +3004,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,7";
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -3036,6 +3043,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,7";
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -3076,6 +3084,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,7";
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -3114,6 +3123,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,7";
+				TVOS_DEPLOYMENT_TARGET = 17.6;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};

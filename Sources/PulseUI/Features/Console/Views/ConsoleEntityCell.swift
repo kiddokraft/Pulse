@@ -23,7 +23,7 @@ struct ConsoleEntityCell: View {
             _ConsoleTaskCell(task: task)
 #if os(macOS)
                 .listRowSeparator(.visible)
-                .frame(height: 42, alignment: .top)
+                .frame(minHeight: 62, alignment: .center)
 #endif
         }
     }

@@ -445,14 +445,6 @@ struct ConnectionInspectorView: View {
         })
     }
 
-    private func makeSummaryViewModel() -> RichTextViewModel {
-        let renderer = TextRenderer(options: .sharing)
-        renderer.renderConnectionFull(task, store: store)
-        let viewModel = RichTextViewModel(string: renderer.make())
-        viewModel.isFilterEnabled = true
-        return viewModel
-    }
-
     @ViewBuilder
     private var toolbar: some View {
         HStack {
@@ -464,6 +456,14 @@ struct ConnectionInspectorView: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 27, alignment: .center)
+    }
+
+    private func makeSummaryViewModel() -> RichTextViewModel {
+        let renderer = TextRenderer(options: .sharing)
+        renderer.renderConnectionFull(task, store: store)
+        let viewModel = RichTextViewModel(string: renderer.make())
+        viewModel.isFilterEnabled = true
+        return viewModel
     }
 }
 
@@ -575,6 +575,7 @@ struct ConnectionInspectorView: View {
             List {
                 backButton
                 domainHeader
+                ConnectionPinButton(task: task)
                 ConnectionTimingViewTV(task: task)
                 details
             }
@@ -585,6 +586,8 @@ struct ConnectionInspectorView: View {
                 backButton
                     .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
                 domainHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                ConnectionPinButton(task: task)
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 ConnectionTimingViewTV(task: task)
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))

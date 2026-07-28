@@ -57,7 +57,7 @@ final class ConsoleEnvironment: ObservableObject {
         self.initialMode = mode
 
         switch mode {
-        case .all: self.mode = UserSettings.shared.mode
+        case .all: self.mode = .all
         case .logs: self.mode = .logs
         case .network: self.mode = .network
         case .connection: self.mode = .connection
