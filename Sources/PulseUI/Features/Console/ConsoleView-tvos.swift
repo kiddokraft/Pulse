@@ -93,14 +93,22 @@ public struct ConsoleView: View {
     }
 
     private var filterLink: some View {
-        Button {
-            environment.router.selectedObjectID = nil
-            isFilterPresented = true
-        } label: {
-            Text("Console")
-                .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+
+          
+
+            Button {
+                environment.router.selectedObjectID = nil
+                isFilterPresented = true
+            } label: {
+                HStack{
+                    Text("Filter")
+                        .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+                    Spacer()
+                    Image(systemName: "line.3.horizontal.decrease")
+                }
+            }
         }
-    }
+    
 
     private func dismissConsoleSettings() {
         isFilterPresented = false
@@ -245,12 +253,12 @@ private struct ConsoleMenuScreen: View {
     }
 
     private var titleHeader: some View {
-        Button(action: {}) {
+      
             Text("Console")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
+    
 
     private func show(_ destination: ConsoleMenuDestination) {
         path.append(destination)
@@ -310,12 +318,12 @@ private struct ConsoleMenuView: View {
     }
 
     private func sectionRow(_ title: String) -> some View {
-        Button(action: {}) {
+     
             Text(title)
                 .font(.subheadline.weight(.semibold))
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        
     }
 
     private var modeSelection: Binding<ConsoleMode> {
