@@ -12,11 +12,16 @@ struct ConsoleListContentView: View {
     @EnvironmentObject var viewModel: ConsoleListViewModel
 
     var body: some View {
-#if os(iOS) || os(visionOS)
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
         if !viewModel.pins.isEmpty, !viewModel.isShowingFocusedEntities {
             ConsoleListPinsSectionView(viewModel: viewModel)
+                
             if !viewModel.entities.isEmpty {
+#if os(iOS) || os(visionOS) || os(macOS)
                 PlainListGroupSeparator()
+#else
+            
+#endif
             }
         }
 #endif

@@ -54,6 +54,7 @@ struct ConsoleMessageDetailsView: View {
             List {
                 backButton
                 titleHeader
+                PinButton(viewModel: .init(message))
                 details
             }
             .contentMargins(.horizontal, 40, for: .scrollContent)
@@ -63,6 +64,8 @@ struct ConsoleMessageDetailsView: View {
                 backButton
                     .listRowInsets(EdgeInsets(top: 40, leading: 40, bottom: 8, trailing: 40))
                 titleHeader
+                    .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
+                PinButton(viewModel: .init(message))
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))
                 details
                     .listRowInsets(EdgeInsets(top: 8, leading: 40, bottom: 8, trailing: 40))

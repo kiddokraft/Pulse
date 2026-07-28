@@ -51,7 +51,7 @@ struct ConsoleSearchResultView: View {
             }
 #endif
         }
-#if os(iOS) || os(visionOS)
+#if os(iOS) || os(visionOS) || os(macOS)
         if isSeparatorNeeded {
             PlainListGroupSeparator()
         }
@@ -161,7 +161,7 @@ struct ConsoleSearchResultDetailsView: View {
     }
 }
 
-#if os(iOS) || os(visionOS)
+#if os(iOS) || os(visionOS) || os(macOS)
 @available(iOS 15, visionOS 1.0, *)
 struct PlainListGroupSeparator: View {
     var body: some View {
