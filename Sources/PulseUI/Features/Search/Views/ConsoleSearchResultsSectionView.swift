@@ -162,7 +162,7 @@ struct ConsoleSearchResultDetailsView: View {
 }
 
 #if os(iOS) || os(visionOS) || os(macOS)
-@available(iOS 15, visionOS 1.0, *)
+@available(iOS 15, visionOS 1.0, macOS 13, *)
 struct PlainListGroupSeparator: View {
     var body: some View {
         Rectangle().foregroundColor(.clear) // DIY separator
@@ -174,7 +174,7 @@ struct PlainListGroupSeparator: View {
 }
 #endif
 
-@available(iOS 15, visionOS 1.0, *)
+@available(iOS 15, visionOS 1.0, macOS 13, *)
 struct PlainListSectionHeader<Content: View>: View {
     var title: String?
     @ViewBuilder let content: () -> Content
