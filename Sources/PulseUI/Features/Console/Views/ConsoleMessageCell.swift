@@ -23,7 +23,7 @@ struct ConsoleMessageCell: View {
                 .lineLimit(settings.lineLimit)
         }
 #if os(macOS)
-        contents.padding(.vertical, 5)
+        contents.padding(3)
 #else
         if #unavailable(iOS 16) {
             contents.padding(.vertical, 4)

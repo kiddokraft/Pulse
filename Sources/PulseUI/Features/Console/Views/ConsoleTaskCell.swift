@@ -17,11 +17,8 @@ struct ConsoleTaskCell: View {
     @EnvironmentObject var environment: ConsoleEnvironment
 
     var body: some View {
-#if os(macOS)
-        let spacing: CGFloat = 3
-#else
-        let spacing: CGFloat = 6
-#endif
+        let spacing: CGFloat = 5
+
 
         let contents = VStack(alignment: .leading, spacing: spacing) {
             title.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -35,7 +32,7 @@ struct ConsoleTaskCell: View {
 //            .animation(.default, value: task.state)
 #endif
 #if os(macOS)
-        contents.padding(5)
+        contents.padding(3)
 #else
         if #unavailable(iOS 16) {
             contents.padding(.vertical, 4)
