@@ -204,14 +204,14 @@ struct PlainListSectionHeader<Content: View>: View {
     }
 }
 
-@available(iOS 15, visionOS 1.0, *)
+@available(iOS 15, visionOS 1.0, macOS 13, *)
 extension PlainListSectionHeader where Content == Text {
     init(title: String) {
         self.init(title: title, content: { Text(title) })
     }
 }
 
-@available(iOS 15, visionOS 1.0, *)
+@available(iOS 15, visionOS 1.0, macOS 13, *)
 struct PlainListExpandableSectionHeader<Destination: View>: View {
     let title: String
     let count: Int
@@ -253,7 +253,7 @@ struct PlainListSeeAllView: View {
     }
 }
 
-@available(iOS 15, visionOS 1.0, *)
+@available(iOS 15, visionOS 1.0, macOS 13, *)
 struct PlainListSectionHeaderSeparator: View {
     let title: String
 
