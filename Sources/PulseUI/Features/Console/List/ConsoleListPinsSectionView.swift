@@ -31,7 +31,10 @@ struct ConsoleListPinsSectionView: View {
 
         ForEach(prefix, id: \.pinCellID, content: ConsoleEntityCell.init)
             .listRowSeparator(.hidden)
+        #if os(macOS)
+    
             .listRowBackground(Color.separator.opacity(0.2))
+        #endif
 
         Button(action: viewModel.buttonRemovePinsTapped) {
             Text("Remove Pins")
