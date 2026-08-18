@@ -60,11 +60,13 @@ private struct _ConsoleMessageCell: View {
         cell.swipeActions(edge: .leading, allowsFullSwipe: true) {
             PinButton(viewModel: .init(message)).tint(.pink)
         }
+#if os(iOS) || os(visionOS)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(action: { shareItems = ShareService.share(message, as: .html) }) {
                 Label("Share", systemImage: "square.and.arrow.up.fill")
             }.tint(.blue)
         }
+#endif
         .contextMenu {
             ContextMenu.MessageContextMenu(message: message, shareItems: $shareItems)
         }
@@ -115,17 +117,15 @@ private struct _ConsoleTaskCell: View {
                 PinButton(viewModel: .init(task)).tint(.pink)
             }
         }
+#if os(iOS) || os(visionOS)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(action: {
-#if os(iOS) || os(visionOS)
                 shareItems = ShareService.share(task, as: .html, store: store)
-#else
-                sharedTask = task
-#endif
             }) {
                 Label("Share", systemImage: "square.and.arrow.up.fill")
             }.tint(.blue)
         }
+#endif
         .contextMenu {
             // Use connection-specific context menu for connections
             if task.isConnection {

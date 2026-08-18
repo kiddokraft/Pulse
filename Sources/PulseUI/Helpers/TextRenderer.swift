@@ -87,6 +87,11 @@ final class TextRenderer {
     }
 
     func render(_ task: NetworkTaskEntity, content: NetworkContent, store: LoggerStore) {
+        guard !task.isConnection else {
+            renderConnectionSummary(task, store: store)
+            return
+        }
+
         if content.contains(.largeHeader) {
             renderLargeHeader(for: task, store: store)
         } else if content.contains(.header) {
