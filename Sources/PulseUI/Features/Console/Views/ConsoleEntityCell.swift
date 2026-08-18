@@ -17,13 +17,13 @@ struct ConsoleEntityCell: View {
             _ConsoleMessageCell(message: message)
 #if os(macOS)
                 .listRowSeparator(.visible)
-                .frame(minHeight: 42, alignment: .center)
+                .frame(height: 42, alignment: .top)
 #endif
         case .task(let task):
             _ConsoleTaskCell(task: task)
 #if os(macOS)
                 .listRowSeparator(.visible)
-                .frame(minHeight: 42, alignment: .center)
+                .frame(height: 42, alignment: .top)
 #endif
         }
     }
