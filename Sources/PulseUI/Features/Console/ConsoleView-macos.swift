@@ -63,18 +63,18 @@ private struct ConsoleMainView: View {
                             
                             .frame(width: 500, height: 650)
                     }
-                    Button(action: { isShowingSessions = true }) {
-                        Label("Show Sessions", systemImage: "tray.full")
-                    }
-                    .popover(isPresented: $isShowingSessions) {
-                        SessionsView().frame(width: 300, height: 420)
-                    }
-                    Button(action: { isShowingSettings = true }) {
-                        Label("More", systemImage: "ellipsis")
-                    }
-                    .popover(isPresented: $isShowingSettings) {
-                        SettingsView().frame(width: 300, height: 210)
-                    }
+//                    Button(action: { isShowingSessions = true }) {
+//                        Label("Show Sessions", systemImage: "tray.full")
+//                    }
+//                    .popover(isPresented: $isShowingSessions) {
+//                        SessionsView().frame(width: 300, height: 420)
+//                    }
+//                    Button(action: { isShowingSettings = true }) {
+//                        Label("More", systemImage: "ellipsis")
+//                    }
+//                    .popover(isPresented: $isShowingSettings) {
+//                        SettingsView().frame(width: 300, height: 210)
+//                    }
                 }
             }
     }
