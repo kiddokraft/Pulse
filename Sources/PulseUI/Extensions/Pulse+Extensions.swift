@@ -78,6 +78,18 @@ extension NetworkTaskEntity {
         statusCode == 200 ? .complete : .connected
     }
 
+    var isConnectionPaused: Bool {
+        message?.isPinned == true
+    }
+
+    var connectionDisplayTitle: String {
+        isConnectionPaused ? "Paused" : connectionState.title
+    }
+
+    var connectionDisplayTintColor: Color {
+        isConnectionPaused ? .pause : connectionState.tintColor
+    }
+
     /// Connection state for proxy/VPN connections.
     enum ConnectionState {
         case connected  // Connection is open and stable

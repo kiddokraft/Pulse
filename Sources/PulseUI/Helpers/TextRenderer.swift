@@ -210,10 +210,10 @@ final class TextRenderer {
     /// Renders a connection-specific summary for proxy/VPN connections (TCP/UDP).
     func renderConnectionSummary(_ task: NetworkTaskEntity, store: LoggerStore) {
         // Header with status
-        let statusTitle = task.connectionState == .complete ? "Complete" : "Active"
-        let statusColor = task.connectionState == .complete
-            ? ConnectionColors.complete
-            : ConnectionColors.connected
+        let statusTitle = task.connectionDisplayTitle
+        let statusColor: UXColor = task.isConnectionPaused
+            ? .systemPink
+            : task.connectionState == .complete ? ConnectionColors.complete : ConnectionColors.connected
         string.append(render(statusTitle + "\n", role: .title, weight: .semibold, color: statusColor))
         string.append(spacer())
 

@@ -119,21 +119,21 @@ private struct ConnectionHeaderView: View {
             HStack(spacing: 8) {
             // Status with indicator
            
-                if task.connectionState == .connected {
+                if task.connectionState == .connected, !task.isConnectionPaused {
                     Circle()
-                        .fill(task.connectionState.tintColor)
+                        .fill(task.connectionDisplayTintColor)
                         .frame(width: 10, height: 10)
                         .opacity(isPulsing ? 0.5 : 1.0)
                         .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isPulsing)
                         .onAppear { isPulsing = true }
                 } else {
                     Circle()
-                        .fill(task.connectionState.tintColor)
+                        .fill(task.connectionDisplayTintColor)
                         .frame(width: 10, height: 10)
                 }
-                Text(task.connectionState.title)
+                Text(task.connectionDisplayTitle)
                 .font(.headline)
-                    .foregroundColor(task.connectionState.tintColor)
+                    .foregroundColor(task.connectionDisplayTintColor)
 
                 Text("•")
                     .foregroundColor(.secondary)
@@ -208,10 +208,10 @@ private struct ConnectionStatusView: View {
             Spacer()
             HStack(spacing: 6) {
                 Circle()
-                    .fill(task.connectionState.tintColor)
+                    .fill(task.connectionDisplayTintColor)
                     .frame(width: 8, height: 8)
-                Text(task.connectionState.title)
-                    .foregroundColor(task.connectionState.tintColor)
+                Text(task.connectionDisplayTitle)
+                    .foregroundColor(task.connectionDisplayTintColor)
                     .fontWeight(.medium)
             }
         }
@@ -613,7 +613,7 @@ struct ConnectionInspectorView: View {
     @ViewBuilder private var details: some View {
         Section {
             sectionRow("Connection")
-            detailRow("Status", value: task.connectionState.title, color: task.connectionState.tintColor)
+            detailRow("Status", value: task.connectionDisplayTitle, color: task.connectionDisplayTintColor)
             detailRow("Network", value: task.httpMethod?.uppercased())
             detailRow("Domain", value: task.connectionDomain ?? task.host)
             detailRow("Source", value: task.connectionSource)
@@ -710,8 +710,8 @@ struct ConnectionInspectorView: View {
                 HStack {
                     Text("Status")
                     Spacer()
-                    Text(task.connectionState.title)
-                        .foregroundColor(task.connectionState.tintColor)
+                    Text(task.connectionDisplayTitle)
+                        .foregroundColor(task.connectionDisplayTintColor)
                 }
             }
 

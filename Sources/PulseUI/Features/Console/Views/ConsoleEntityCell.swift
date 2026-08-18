@@ -58,11 +58,7 @@ private struct _ConsoleMessageCell: View {
 
 #if os(iOS) || os(macOS) || os(visionOS)
         cell.swipeActions(edge: .leading, allowsFullSwipe: true) {
-#if os(macOS)
-            PinButton(viewModel: .init(message), isSwipeAction: true).tint(.gray)
-#else
             PinButton(viewModel: .init(message), isTextNeeded: false).tint(.pink)
-#endif
         }
 #if os(iOS) || os(visionOS)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -116,17 +112,9 @@ private struct _ConsoleTaskCell: View {
 #if os(iOS) || os(macOS) || os(visionOS)
         cell.swipeActions(edge: .leading, allowsFullSwipe: true) {
             if task.isConnection {
-#if os(macOS)
-                ConnectionPinButton(task: task, isSwipeAction: true).tint(.gray)
-#else
                 ConnectionPinButton(task: task, isTextNeeded: false).tint(.pink)
-#endif
             } else {
-#if os(macOS)
-                PinButton(viewModel: .init(task), isSwipeAction: true).tint(.gray)
-#else
                 PinButton(viewModel: .init(task), isTextNeeded: false).tint(.pink)
-#endif
             }
         }
 #if os(iOS) || os(visionOS)

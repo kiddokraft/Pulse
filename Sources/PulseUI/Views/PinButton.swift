@@ -13,16 +13,10 @@ import Combine
 struct PinButton: View {
     @ObservedObject var viewModel: PinButtonViewModel
     var isTextNeeded: Bool = true
-    var isSwipeAction = false
 
     var body: some View {
         Button(action: viewModel.togglePin) {
-            if isSwipeAction {
-                SwipeActionLabel(
-                    title: viewModel.isPinned ? "Unpin" : "Pin",
-                    systemImage: viewModel.isPinned ? "pin.fill" : "pin"
-                )
-            } else if isTextNeeded {
+            if isTextNeeded {
                 Label(viewModel.isPinned ? "Unpin" : "Pin", systemImage: viewModel.isPinned ? "pin.fill" : "pin")
             } else {
                 Image(systemName: viewModel.isPinned ? "pin.fill" : "pin")
@@ -37,14 +31,12 @@ struct ConnectionPinButton: View {
     @ObservedObject private var viewModel: PinButtonViewModel
     private let task: NetworkTaskEntity
     var isTextNeeded: Bool = true
-    var isSwipeAction = false
     @EnvironmentObject private var environment: ConsoleEnvironment
     @State private var isUpdating = false
 
-    init(task: NetworkTaskEntity, isTextNeeded: Bool = true, isSwipeAction: Bool = false) {
+    init(task: NetworkTaskEntity, isTextNeeded: Bool = true) {
         self.task = task
         self.isTextNeeded = isTextNeeded
-        self.isSwipeAction = isSwipeAction
         _viewModel = ObservedObject(wrappedValue: .init(task))
     }
 
@@ -68,12 +60,7 @@ struct ConnectionPinButton: View {
                 }
             }
         } label: {
-            if isSwipeAction {
-                SwipeActionLabel(
-                    title: viewModel.isPinned ? "Resume" : "Pause",
-                    systemImage: viewModel.isPinned ? "pin.fill" : "pin"
-                )
-            } else if isTextNeeded {
+            if isTextNeeded {
                 Label(
                     viewModel.isPinned ? "Resume" : "Pause",
                     systemImage: viewModel.isPinned ? "pin.fill" : "pin"
@@ -83,25 +70,6 @@ struct ConnectionPinButton: View {
             }
         }
         .disabled(isUpdating)
-    }
-}
-
-private struct SwipeActionLabel: View {
-    let title: String
-    let systemImage: String
-
-    var body: some View {
-        VStack(spacing: 3) {
-            Image(systemName: systemImage)
-                .font(.body.weight(.medium))
-                .foregroundStyle(.gray)
-                .frame(width: 28, height: 28)
-                .background(.white, in: Circle())
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.white)
-        }
-        .frame(width: 48)
     }
 }
 
